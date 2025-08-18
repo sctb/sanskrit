@@ -1,0 +1,316 @@
+;; -*- lexical-binding: t -*-
+
+(defgroup sanskrit nil
+  "Tools for editing Sanskrit"
+  :version "0.1"
+  :prefix "sanskrit-"
+  :group 'editing)
+
+(defvar sanskrit-input-method "sanskrit-postfix"
+  "Name of the QUAIL-based input method for writing IAST")
+
+(defun sanskrit-toggle-input-method ()
+  (interactive)
+  (if (equal current-input-method sanskrit-input-method)
+      (progn
+	(set-input-method nil)
+	(message "Sanskrit input disabled"))
+    (set-input-method sanskrit-input-method)
+    (message "Sanskrit input enabled")))
+
+(defvar sanskrit-mode-map (make-sparse-keymap)
+  "Keymap for the Sanskrit minor mode")
+
+(define-minor-mode sanskrit-mode
+  "Toggle Sanskrit mode"
+  :init-value nil
+  :lighter " Sanskrit")
+
+(quail-define-package
+ sanskrit-input-method "UTF-8" "InR<" t
+ "Input method for Sanskrit transliteration with postfix modifiers"
+ nil t nil nil nil nil nil nil nil nil t)
+
+(quail-define-rules
+ ;; macron
+ ("aa" "ā") ("Aa" "Ā") ("AA" "Ā")
+ ("ii" "ī") ("Ii" "Ī") ("II" "Ī")
+ ("uu" "ū") ("Uu" "Ū") ("UU" "Ū")
+ ("rr." "ṝ") ("Rr." "Ṝ") ("RR." "Ṝ")
+ ("ll." "ḹ") ("Ll." "Ḹ") ("ll." "Ḹ")
+ ;; dot below
+ ("r." "ṛ") ("R." "Ṛ")
+ ("l." "ḷ") ("L." "Ḷ")
+ ("m." "ṃ") ("M." "Ṃ")
+ ("h." "ḥ") ("H." "Ḥ")
+ ("t." "ṭ") ("T." "Ṭ")
+ ("d." "ḍ") ("D." "Ḍ")
+ ("n." "ṇ") ("N." "Ṇ")
+ ("s." "ṣ") ("S." "Ṣ")
+ ;; diacritic above
+ ("n'" "ṅ") ("N'" "Ṅ")
+ ("m'" "ṁ") ("M'" "Ṁ")
+ ("s'" "ś") ("S'" "Ś")
+ ("n~" "ñ") ("N~" "Ñ")
+ ;; dandas
+ ("|" "।") ("||" "॥"))
+
+(defvar sanskrit-consonants
+  ;; unvoiced    aspirated     voiced      voiced/asp   nasal
+  '(("k" . "क") ("kh" . "ख") ("g" . "ग") ("gh" . "घ") ("ṅ" . "ङ") ; velar
+    ("c" . "च") ("ch" . "छ") ("j" . "ज") ("jh" . "झ") ("ñ" . "ञ") ; palatal
+    ("ṭ" . "ट") ("ṭh" . "ठ") ("ḍ" . "ड") ("ḍh" . "ढ") ("ṇ" . "ण") ; retroflex
+    ("t" . "त") ("th" . "थ") ("d" . "द") ("dh" . "ध") ("n" . "न") ; dental
+    ("p" . "प") ("ph" . "फ") ("b" . "ब") ("bh" . "भ") ("m" . "म") ; labial
+    ("y" . "य") ("r" . "र") ("l" . "ल") ("v" . "व") ; semi-vowels
+    ("ś" . "श") ("ṣ" . "ष") ("s" . "स") ("h" . "ह")))  ; sibilants and h
+
+(defvar sanskrit-consonant-chars
+  "kgṅcjñṭḍṇtdnpbmyrlvśṣsh")
+
+(defvar sanskrit-vowels
+  '(("a" . "अ") ("ā" . "आ") ("i" . "इ") ("ī" . "ई") ("u" . "उ") ("ū" . "ऊ")
+    ("ṛ" . "ऋ") ("ṝ" . "ॠ") ("ḷ" . "ऌ")
+    ("e" . "ए") ("ai" . "ऐ") ("o" . "ओ") ("au" . "औ")))
+
+(defvar sanskrit-vowel-chars
+  "aāiīuūṝḹeo")
+
+(defvar sanskrit-signs
+  '((?ṁ . "ं") (?ḥ . "ः")))
+
+(defvar sanskrit-vowel-signs
+  '(("ā" . "ा") ("i" . "ि") ("ī" . "ी") ("u" . "ु") ("ū" . "ू")
+    ("ṛ" . "ृ") ("ṝ" . "ॄ")
+    ("e" . "े") ("ai" . "ै") ("o" . "ो") ("au" . "ौ")))
+
+(defvar sanskrit-virama "्")
+
+(defvar sanskrit-digits
+  '((?0 . "०") (?1 . "१") (?2 . "२") (?3 . "३") (?4 . "४")
+    (?5 . "५") (?6 . "६") (?7 . "७") (?8 . "८") (?9 . "९")))
+
+(defun sanskrit-vowel-p (char)
+  (seq-contains-p sanskrit-vowel-chars char))
+
+(defun sanskrit-consonant-p (char)
+  (seq-contains-p sanskrit-consonant-chars char))
+
+(defun sanskrit-sign-p (char)
+  (assq char sanskrit-signs))
+
+(defun sanskrit-delimiter-p (char)
+  (memq char '(?\s ?- ?। ?॥ ?\n)))
+
+(defun sanskrit-span (string i matcher)
+  (seq-take-while matcher (substring string i)))
+
+(defun sanskrit-take-1 (string i)
+  (string (aref string i)))
+
+(defun sanskrit-take-2 (string i)
+  (if (> (length string) (1+ i))
+      (concat (sanskrit-take-1 string i)
+	      (sanskrit-take-1 string (1+ i)))
+    (sanskrit-take-1 string i)))
+
+(defun sanskrit-next-consonant (string i)
+  (or (assoc (sanskrit-take-2 string i) sanskrit-consonants)
+      (assoc (sanskrit-take-1 string i) sanskrit-consonants)))
+
+(defun sanskrit-consonant (string i)
+  (let* ((string (sanskrit-span string i #'sanskrit-consonant-p))
+	 (list nil)
+	 (len (length string))
+	 (i 0))
+    (while (< i len)
+      (let ((consonant (sanskrit-next-consonant string i)))
+	(unless consonant
+	  (error "Unexpected character: %c" (elt string i)))
+	(incf i (length (car consonant)))
+	(push (cdr consonant) list)))
+    (cons string (string-join (nreverse list) sanskrit-virama))))
+
+(defun sanskrit-vowel (string i &optional sign)
+  (let ((string (sanskrit-span string i #'sanskrit-vowel-p))
+	(alist (if sign sanskrit-vowel-signs sanskrit-vowels)))
+    (or (assoc string alist)
+	(error "Unrecognized vowel: %s" string))))
+
+(defun sanskrit-render (string)
+  (let ((string (downcase string))
+	(list nil)
+	(len (length string))
+	(i 0)
+	(consnt nil))
+    (while (< i len)
+      (let* ((c (aref string i))
+	     (d (alist-get c sanskrit-digits))
+	     (n 1))
+	(cond (d (push d list))
+	      ((sanskrit-delimiter-p c)
+	       (when consnt
+		 (push sanskrit-virama list))
+	       (unless (eq c ?-)
+		 (push (string c) list)))
+	      ((and consnt (eq c ?a)))
+	      ((sanskrit-sign-p c)
+	       (push (alist-get c sanskrit-signs) list))
+	      ((sanskrit-vowel-p c)
+	       (let ((vowel (sanskrit-vowel string i consnt)))
+		 (push (cdr vowel) list)
+		 (setq n (length (car vowel)))))
+	      ((sanskrit-consonant-p c)
+	       (let ((consonant (sanskrit-consonant string i)))
+		 (push (cdr consonant) list)
+		 (setq n (length (car consonant)))))
+	      (t (error "Unexpected character: %c" c)))
+	(setq consnt (sanskrit-consonant-p c))
+	(incf i n)))
+    (when consnt
+      (push sanskrit-virama list))
+    (string-join (nreverse list))))
+
+(defun sanskrit-render-current-word ()
+  (interactive)
+  (let* ((word (current-word))
+	 (string (sanskrit-render word)))
+    (kill-new string)
+    (message "Copied: %s" string)))
+
+(defun sanskrit-render-region (point mark)
+  (interactive "r")
+  (let* ((region (buffer-substring point mark))
+	 (string (sanskrit-render (string-trim region))))
+    ;; (pop-to-buffer "*Sanskrit*")
+    ;; (insert string)
+    (kill-new string)))
+
+(when (featurep 'ert)
+  (ert-deftest sanskrit-render ()
+    (should (equal (sanskrit-render "a") "अ"))
+    (should (equal (sanskrit-render "ai") "ऐ"))
+    (should (equal (sanskrit-render "ī") "ई"))
+    (should (equal (sanskrit-render "ka") "क"))
+    (should (equal (sanskrit-render "k") "क्"))
+    (should (equal (sanskrit-render "ki") "कि"))
+    (should (equal (sanskrit-render "14") "१४"))
+    (should (equal (sanskrit-render "Śiva") "शिव"))
+    (should (equal (sanskrit-render "Śaktī") "शक्ती"))
+    (should (equal (sanskrit-render "icchā") "इच्छा"))
+    (should (equal (sanskrit-render "jñāna") "ज्ञान"))
+    (should (equal (sanskrit-render "kriyā") "क्रिया"))
+    (should (equal (sanskrit-render "cit ॥ 1") "चित् ॥ १"))
+    (should (equal (sanskrit-render "Ānanda-śakti") "आनन्दशक्ति"))
+    (should (equal (sanskrit-render "vāk\n0") "वाक्\n०"))
+    (should (equal (sanskrit-render "citiḥ") "चितिः"))
+    (should (equal (sanskrit-render "siddhi") "सिद्धि"))))
+
+(defcustom sanskrit-dictionary-file
+  (let ((file (or load-file-name (buffer-file-name))))
+    (concat (file-name-directory file) "ex.txt"))
+  "Path to the ap.txt dictionary file"
+  :type 'string)
+
+(defun sanskrit-dictionary-index-file ()
+  (concat sanskrit-dictionary-file ".index"))
+
+(defvar sanskrit-dictionary-index nil)
+
+(defun sanskrit-index-dictionary ()
+  (with-temp-file (sanskrit-dictionary-index-file)
+    (let ((output (current-buffer))
+	  (input sanskrit-dictionary-file)
+	  (n 0))
+      (with-temp-buffer
+	(insert-file-contents input)
+	(while (re-search-forward "<L>" nil t)
+	  (re-search-forward "<k1>\\(.*\\)<k2>")
+	  (let ((word (match-string 1)))
+	    (forward-line)
+	    (let ((beg (1- (position-bytes (point)))))
+	      (re-search-forward "<LEND>")
+	      (let* ((bytes (1- (position-bytes (point))))
+		     (end (- bytes (length "<LEND>"))))
+		(print (list word beg end) output)
+		(incf n))))))
+      (message "Indexed %d entries" n))))
+
+(defun sanskrit-dictionary-index-read-entry ()
+  (condition-case nil
+      (read (current-buffer))
+    (end-of-file nil)))
+
+(defun sanskrit-dictionary-read-index ()
+  (let ((file (sanskrit-dictionary-index-file)))
+    (unless (file-exists-p file)
+      (sanskrit-index-dictionary))
+   (let ((index (make-hash-table :test 'equal)))
+     (with-temp-buffer
+       (insert-file-contents file)
+       (while-let ((entry (sanskrit-dictionary-index-read-entry)))
+	 (puthash (car entry) (cdr entry) index)))
+     (setq sanskrit-dictionary-index index)
+     (message "Loaded %s entries" (hash-table-count index)))))
+
+(defun sanskrit-dictionary-read-entry (word)
+  (unless (hash-table-p sanskrit-dictionary-index)
+    (sanskrit-dictionary-read-index))
+  (if-let* ((location (gethash word sanskrit-dictionary-index)))
+      (pcase-let ((`(,beg ,end) location))
+	(let ((file sanskrit-dictionary-file)
+	      (buffer (get-buffer-create "*Dictionary entry*")))
+	  (with-current-buffer buffer
+	    (insert-file-contents file nil beg end t))
+	  (pop-to-buffer buffer)))
+    (message "No entry found for ‘%s’" word)))
+
+(defvar sanskrit-slp1
+  '(("a" . "a") ("ā" . "A")  ("i" . "i") ("ī" . "I") ("u" . "u") ("ū" . "U")
+    ("ṛ" . "f") ("ṝ" . "F")  ("ḷ" . "x")
+    ("e" . "e") ("ai" . "E") ("o" . "o") ("au" . "O")
+    ("ṁ" . "M") ("ḥ" . "H")
+    ("k" . "k") ("kh" . "K") ("g" . "g") ("gh" . "G") ("ṅ" . "N")
+    ("c" . "c") ("ch" . "C") ("j" . "j") ("jh" . "J") ("ñ" . "Y")
+    ("ṭ" . "w") ("ṭh" . "W") ("ḍ" . "q") ("ḍh" . "Q") ("ṇ" . "R")
+    ("t" . "t") ("th" . "T") ("d" . "d") ("dh" . "D") ("n" . "n")
+    ("p" . "p") ("ph" . "P") ("b" . "b") ("bh" . "B") ("m" . "m")
+    ("y" . "y") ("r" . "r")  ("l" . "l") ("v" . "v")
+    ("ś" . "S") ("ṣ" . "z")  ("s" . "s") ("h" . "h")))
+
+(defun sanskrit-iast-to-slp1 (string)
+  (let ((list nil)
+	(graphemes (string-glyph-split string)))
+    (while graphemes
+      (let* ((pair (seq-take graphemes 2))
+	     (found (assoc (string-join pair) sanskrit-slp1)))
+	(if (null found)
+	    (let ((key (car graphemes)))
+	      (push (or (cdr (assoc key sanskrit-slp1)) key) list))
+	  (push (cdr found) list)
+	  (when (= (length pair) 2)
+	    (setq graphemes (cdr graphemes)))))
+      (setq graphemes (cdr graphemes)))
+    (string-join (nreverse list))))
+
+(defun sanskrit-slp1-to-iast (string)
+  (let ((list nil))
+    (dotimes (i (length string))
+      (let ((key (sanskrit-take-1 string i)))
+	(push (or (car (rassoc key sanskrit-slp1)) key) list)))
+    (string-join (nreverse list))))
+
+(when (featurep 'ert)
+  ;; TODO: multi-char, extra characters
+  (ert-deftest sanskrit-slp1-to-iast ()
+    (should (equal (sanskrit-slp1-to-iast "a") "a"))
+    (should (equal (sanskrit-slp1-to-iast "B") "bh"))
+    (should (equal (sanskrit-slp1-to-iast "q") "ḍ")))
+
+  (ert-deftest sanskrit-iast-to-slp1 ()
+    (should (equal (sanskrit-iast-to-slp1 "a") "a"))
+    (should (equal (sanskrit-iast-to-slp1 "ā") "A"))
+    (should (equal (sanskrit-iast-to-slp1 "ṝ") "F"))
+    (should (equal (sanskrit-iast-to-slp1 "ai") "E"))))
+
+(provide 'sanskrit)
