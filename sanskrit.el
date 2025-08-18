@@ -77,7 +77,8 @@
   "aāiīuūṝḹeo")
 
 (defvar sanskrit-signs
-  '((?ṁ . "ं") (?ḥ . "ः")))
+  ;; anusvāra   visarga
+  '((?ṃ . "ं") (?ḥ . "ः")))
 
 (defvar sanskrit-vowel-signs
   '(("ā" . "ा") ("i" . "ि") ("ī" . "ी") ("u" . "ु") ("ū" . "ू")
@@ -262,7 +263,8 @@
         (let ((file sanskrit-dictionary-file)
               (buffer (get-buffer-create "*Dictionary entry*")))
           (with-current-buffer buffer
-            (insert-file-contents file nil beg end t))
+            (insert-file-contents file nil beg end t)
+	    (goto-char (point-min)))
           (pop-to-buffer buffer)))
     (message "No entry found for ‘%s’" word)))
 
@@ -280,7 +282,7 @@
   '(("a" . "a") ("ā" . "A")  ("i" . "i") ("ī" . "I") ("u" . "u") ("ū" . "U")
     ("ṛ" . "f") ("ṝ" . "F")  ("ḷ" . "x")
     ("e" . "e") ("ai" . "E") ("o" . "o") ("au" . "O")
-    ("ṁ" . "M") ("ḥ" . "H")
+    ("ṃ" . "M") ("ḥ" . "H")
     ("k" . "k") ("kh" . "K") ("g" . "g") ("gh" . "G") ("ṅ" . "N")
     ("c" . "c") ("ch" . "C") ("j" . "j") ("jh" . "J") ("ñ" . "Y")
     ("ṭ" . "w") ("ṭh" . "W") ("ḍ" . "q") ("ḍh" . "Q") ("ṇ" . "R")
@@ -328,6 +330,7 @@
     (should (equal (sanskrit-iast-to-slp1 "māyā") "mAyA"))
     (should (equal (sanskrit-iast-to-slp1 "vimarśaḥ") "vimarSaH"))
     (should (equal (sanskrit-iast-to-slp1 "prakṛtiḥ") "prakftiH"))
-    (should (equal (sanskrit-iast-to-slp1 "Ānanda-śakti") "Ananda-Sakti"))))
+    (should (equal (sanskrit-iast-to-slp1 "Ānanda-śakti") "Ananda-Sakti"))
+    (should (equal (sanskrit-iast-to-slp1 "ahaṃbhāva") "ahaMBAva"))))
 
 (provide 'sanskrit)
