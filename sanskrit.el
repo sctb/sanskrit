@@ -233,7 +233,6 @@
               (re-search-forward "<LEND>")
               (let* ((bytes (1- (position-bytes (point))))
                      (end (- bytes (length "<LEND>"))))
-		;; TODO: duplicate entry with H suffix (if any) removed
                 (print (list word beg end) output)
                 (incf n))))))
       (message "Indexed %d entries" n))))
@@ -247,13 +246,13 @@
   (let ((file (sanskrit-dictionary-index-file)))
     (unless (file-exists-p file)
       (sanskrit-index-dictionary))
-   (let ((index (make-hash-table :test 'equal)))
-     (with-temp-buffer
-       (insert-file-contents file)
-       (while-let ((entry (sanskrit-dictionary-index-read-entry)))
-         (puthash (car entry) (cdr entry) index)))
-     (setq sanskrit-dictionary-index index)
-     (message "Loaded %s entries" (hash-table-count index)))))
+    (let ((index (make-hash-table :test 'equal)))
+      (with-temp-buffer
+	(insert-file-contents file)
+	(while-let ((entry (sanskrit-dictionary-index-read-entry)))
+          (puthash (car entry) (cdr entry) index)))
+      (setq sanskrit-dictionary-index index)
+      (message "Loaded %s entries" (hash-table-count index)))))
 
 (defun sanskrit-dictionary-show-entry (word)
   (unless (hash-table-p sanskrit-dictionary-index)
