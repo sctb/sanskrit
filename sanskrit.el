@@ -208,7 +208,7 @@
 
 (defcustom sanskrit-dictionary-file
   (let ((file (or load-file-name (buffer-file-name))))
-    (concat (file-name-directory file) "ex.txt"))
+    (concat (file-name-directory file) "ap.txt"))
   "Path to the ap.txt dictionary file"
   :type 'string)
 
@@ -232,6 +232,7 @@
               (re-search-forward "<LEND>")
               (let* ((bytes (1- (position-bytes (point))))
                      (end (- bytes (length "<LEND>"))))
+		;; TODO: duplicate entry with H suffix (if any) removed
                 (print (list word beg end) output)
                 (incf n))))))
       (message "Indexed %d entries" n))))
@@ -253,7 +254,7 @@
      (setq sanskrit-dictionary-index index)
      (message "Loaded %s entries" (hash-table-count index)))))
 
-(defun sanskrit-dictionary-read-entry (word)
+(defun sanskrit-dictionary-show-entry (word)
   (unless (hash-table-p sanskrit-dictionary-index)
     (sanskrit-dictionary-read-index))
   (if-let* ((location (gethash word sanskrit-dictionary-index)))
@@ -264,6 +265,16 @@
             (insert-file-contents file nil beg end t))
           (pop-to-buffer buffer)))
     (message "No entry found for ‘%s’" word)))
+
+(defun sanskrit-dictionary-lookup (word)
+  (interactive
+   (list (read-string "Dictionary lookup (SLP1): ")))
+  (sanskrit-dictionary-show-entry word))
+
+(defun sanskrit-dictionary-lookup-current-word ()
+  (interactive)
+  (let ((word (sanskrit-iast-to-slp1 (current-word))))
+    (sanskrit-dictionary-show-entry word)))
 
 (defvar sanskrit-slp1
   '(("a" . "a") ("ā" . "A")  ("i" . "i") ("ī" . "I") ("u" . "u") ("ū" . "U")
@@ -280,7 +291,7 @@
 
 (defun sanskrit-iast-to-slp1 (string)
   (let ((list nil)
-        (graphemes (string-glyph-split string)))
+        (graphemes (string-glyph-split (downcase string))))
     (while graphemes
       (let* ((pair (seq-take graphemes 2))
              (found (assoc (string-join pair) sanskrit-slp1)))
@@ -301,16 +312,22 @@
     (string-join (nreverse list))))
 
 (when (featurep 'ert)
-  ;; TODO: multi-char, extra characters
   (ert-deftest sanskrit-slp1-to-iast ()
     (should (equal (sanskrit-slp1-to-iast "a") "a"))
     (should (equal (sanskrit-slp1-to-iast "B") "bh"))
-    (should (equal (sanskrit-slp1-to-iast "q") "ḍ")))
+    (should (equal (sanskrit-slp1-to-iast "q") "ḍ"))
+    (should (equal (sanskrit-slp1-to-iast "aMhUraRa") "aṁhūraṇa"))
+    (should (equal (sanskrit-slp1-to-iast "pramAtf") "pramātṛ"))
+    (should (equal (sanskrit-slp1-to-iast "mAyA-Sakti") "māyā-śakti")))
 
   (ert-deftest sanskrit-iast-to-slp1 ()
     (should (equal (sanskrit-iast-to-slp1 "a") "a"))
     (should (equal (sanskrit-iast-to-slp1 "ā") "A"))
     (should (equal (sanskrit-iast-to-slp1 "ṝ") "F"))
-    (should (equal (sanskrit-iast-to-slp1 "ai") "E"))))
+    (should (equal (sanskrit-iast-to-slp1 "ai") "E"))
+    (should (equal (sanskrit-iast-to-slp1 "māyā") "mAyA"))
+    (should (equal (sanskrit-iast-to-slp1 "vimarśaḥ") "vimarSaH"))
+    (should (equal (sanskrit-iast-to-slp1 "prakṛtiḥ") "prakftiH"))
+    (should (equal (sanskrit-iast-to-slp1 "Ānanda-śakti") "Ananda-Sakti"))))
 
 (provide 'sanskrit)
