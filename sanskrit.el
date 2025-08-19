@@ -253,17 +253,46 @@
       (setq sanskrit-dictionary-index index)
       (message "Loaded %s entries" (hash-table-count index)))))
 
+(defun sanskrit-visarga-p (word)
+  (equal (substring word -1) "H"))
+
+(defun sanskrit-with-visarga (word)
+  (unless (sanskrit-visarga-p word)
+    (concat word "H")))
+
+(defun sanskrit-without-visarga (word)
+  (when (sanskrit-visarga-p word)
+    (substring word 0 (1- (length word)))))
+
+(defun sanskrit-dictionary-index-lookup (word)
+  (let ((get (lambda (w)
+	       (when-let* ((entry (gethash w sanskrit-dictionary-index)))
+		 (cons w entry)))))
+    (or (funcall get word)
+	(funcall get (sanskrit-with-visarga word))
+	(funcall get (sanskrit-without-visarga word)))))
+
+(defun sanskrit-make-title (string)
+  (put-text-property 0 (length string) 'face 'info-title-1 string))
+
+(defun sanskrit-dictionary-entry-header (word)
+  (let* ((word (sanskrit-slp1-to-iast word))
+	 (deva (sanskrit-render word)))
+    (sanskrit-make-title word)
+    (insert word)
+    (insert " " deva ?\n ?\n)))
+
 (defun sanskrit-dictionary-show-entry (word)
   (unless (hash-table-p sanskrit-dictionary-index)
     (sanskrit-dictionary-read-index))
-  ;; TODO: try adding or removing H if not found
-  (if-let* ((location (gethash word sanskrit-dictionary-index)))
-      (pcase-let ((`(,beg ,end) location))
+  (if-let* ((location (sanskrit-dictionary-index-lookup word)))
+      (pcase-let ((`(,word ,beg ,end) location))
         (let ((file sanskrit-dictionary-file)
               (buffer (get-buffer-create "*Dictionary entry*")))
           (with-current-buffer buffer
             (insert-file-contents file nil beg end t)
-	    (goto-char (point-min)))
+	    (goto-char (point-min))
+	    (sanskrit-dictionary-entry-header word))
           (pop-to-buffer buffer)))
     (message "No entry found for ‘%s’" word)))
 
