@@ -173,6 +173,7 @@
     (string-join (nreverse list))))
 
 (defun sanskrit-render-current-word ()
+  "Copy the current word in IAST format to the kill-ring as Devanāgarī"
   (interactive)
   (let* ((word (current-word))
          (string (sanskrit-render word)))
@@ -180,6 +181,7 @@
     (message "Copied: %s" string)))
 
 (defun sanskrit-render-region (point mark)
+  "Copy the current region in IAST format to the kill-ring as Devanāgarī"
   (interactive "r")
   (let* ((region (buffer-substring point mark))
          (string (sanskrit-render (string-trim region))))
@@ -278,11 +280,13 @@
     (message "No entry found for ‘%s’" word)))
 
 (defun sanskrit-dictionary-lookup (word)
+  "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
    (list (read-string "Dictionary lookup (SLP1): ")))
   (sanskrit--dictionary-show-entry word))
 
 (defun sanskrit-dictionary-lookup-current-word ()
+  "Look up the current word in SLP1 format in the dictionary"
   (interactive)
   (let* ((word (current-word))
 	 (first (car (split-string word "-")))
@@ -303,6 +307,7 @@
     ("ś" . "S") ("ṣ" . "z")  ("s" . "s") ("h" . "h")))
 
 (defun sanskrit-iast-to-slp1 (string)
+  "Convert ‘string’ in IAST transliteration format to SLP1"
   (let ((list nil)
 	(string (downcase string))
 	(i 0)
@@ -320,6 +325,7 @@
     (string-join (nreverse list))))
 
 (defun sanskrit-slp1-to-iast (string)
+  "Convert ‘string’ in SLP1 transliteration format to IAST"
   (let ((list nil))
     (dotimes (i (length string))
       (let* ((key (sanskrit--take-1 string i))
