@@ -255,15 +255,36 @@
 	(funcall get (sanskrit--with-visarga word))
 	(funcall get (sanskrit--without-visarga word)))))
 
-(defun sanskrit--make-title (string)
-  (put-text-property 0 (length string) 'face 'info-title-1 string))
+(defun sanskrit--make-face (string face)
+  (put-text-property 0 (length string) 'face face string)
+  string)
 
 (defun sanskrit--dictionary-entry-header (word)
   (let* ((word (sanskrit-slp1-to-iast word))
 	 (deva (sanskrit-render word)))
-    (sanskrit--make-title word)
+    (sanskrit--make-face word 'info-title-1)
     (insert word)
     (insert " " deva ?\n ?\n)))
+
+(defun sanskrit--replace-match (regex function)
+  (save-excursion
+    (while (re-search-forward regex nil t)
+      (replace-match (funcall function (match-string 1))))))
+
+(defun sanskrit--dictionary-process-entry ()
+  (sanskrit--replace-match "{#\\([^#]+\\)#}" #'sanskrit-slp1-to-iast)
+  (sanskrit--replace-match
+   "{%\\([^%]+\\)%}"
+   (lambda (string)
+     (sanskrit--make-face string 'italic)))
+  (sanskrit--replace-match
+   "{@\\([^@]+\\)@}"
+   (lambda (string)
+     (sanskrit--make-face string 'bold)))
+  (sanskrit--replace-match
+   "<ls[^>]*>\\([^<]+\\)</ls>"
+   (lambda (string)
+     (sanskrit--make-face string 'shadow))))
 
 (defun sanskrit--dictionary-show-entry (word)
   (unless (hash-table-p sanskrit--dictionary-index)
@@ -275,6 +296,7 @@
           (with-current-buffer buffer
             (insert-file-contents file nil beg end t)
 	    (goto-char (point-min))
+	    (sanskrit--dictionary-process-entry)
 	    (sanskrit--dictionary-entry-header word))
           (pop-to-buffer buffer)))
     (message "No entry found for ‘%s’" word)))
