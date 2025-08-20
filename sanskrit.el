@@ -262,7 +262,7 @@
 (defun sanskrit--dictionary-entry-header (word)
   (let* ((word (sanskrit-slp1-to-iast word))
 	 (deva (sanskrit-render word)))
-    (sanskrit--make-face word 'info-title-1)
+    (sanskrit--make-face word 'match)
     (insert word)
     (insert " " deva ?\n ?\n)))
 
@@ -272,6 +272,12 @@
       (replace-match (funcall function (match-string 1))))))
 
 (defun sanskrit--dictionary-process-entry ()
+  ;; TODO: <ab>, [Page], title tweaks, leading dot
+  (save-excursion
+    (when (re-search-forward "^[^¦]+¦ " nil t)
+      (replace-match "")
+      (forward-line)
+      (insert ?\n)))
   (sanskrit--replace-match "{#\\([^#]+\\)#}" #'sanskrit-slp1-to-iast)
   (sanskrit--replace-match
    "{%\\([^%]+\\)%}"
@@ -297,8 +303,8 @@
             (insert-file-contents file nil beg end t)
 	    (goto-char (point-min))
 	    (sanskrit--dictionary-process-entry)
-	    (sanskrit--dictionary-entry-header word))
-          (pop-to-buffer buffer)))
+	    (sanskrit--dictionary-entry-header word)
+	    (pop-to-buffer buffer))))
     (message "No entry found for ‘%s’" word)))
 
 (defun sanskrit-dictionary-lookup (word)
