@@ -299,9 +299,12 @@
   (sanskrit--replace-match "\\[Page.*\n" "")
   (sanskrit--replace-match "^\\." ""))
 
-(defun sanskrit--dictionary-show-entry (word)
+(defun sanskrit--ensure-dictionary-index ()
   (unless (hash-table-p sanskrit--dictionary-index)
-    (sanskrit--dictionary-read-index))
+    (sanskrit--dictionary-read-index)))
+
+(defun sanskrit--dictionary-show-entry (word)
+  (sanskrit--ensure-dictionary-index)
   (if-let* ((location (sanskrit--dictionary-index-lookup word)))
       (pcase-let ((`(,word ,beg ,end) location))
         (let ((file sanskrit-dictionary-file)
@@ -317,9 +320,11 @@
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
-   (list (completing-read
-	  "Dictionary lookup (SLP1): "
-	  sanskrit--dictionary-index)))
+   (progn
+     (sanskrit--ensure-dictionary-index)
+     (list (completing-read
+	    "Dictionary lookup (SLP1): "
+	    sanskrit--dictionary-index))))
   (sanskrit--dictionary-show-entry word))
 
 (defun sanskrit-dictionary-lookup-current-word ()
