@@ -295,7 +295,7 @@
   (sanskrit--replace-match
    "<ab[^>]*>\\([^<]+\\)</ab>"
    (lambda (string)
-     (sanskrit--make-face string 'link)))
+     (sanskrit--make-face string 'shadow)))
   (sanskrit--replace-match "\\[Page.*\n" "")
   (sanskrit--replace-match "^\\." ""))
 
@@ -317,11 +317,13 @@
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
-   (list (read-string "Dictionary lookup (SLP1): ")))
+   (list (completing-read
+	  "Dictionary lookup (SLP1): "
+	  sanskrit--dictionary-index)))
   (sanskrit--dictionary-show-entry word))
 
 (defun sanskrit-dictionary-lookup-current-word ()
-  "Look up the current word in SLP1 format in the dictionary"
+  "Look up the current word in IAST format in the dictionary"
   (interactive)
   (let* ((word (current-word))
 	 (first (car (split-string word "-")))
