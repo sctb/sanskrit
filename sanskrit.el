@@ -262,9 +262,10 @@
 (defun sanskrit--dictionary-entry-header (word)
   (let* ((word (sanskrit-slp1-to-iast word))
 	 (deva (sanskrit-render word)))
-    (sanskrit--make-face word 'match)
-    (insert word)
-    (insert " " deva ?\n ?\n)))
+    (save-excursion
+      (sanskrit--make-face word 'match)
+      (insert word)
+      (insert " " deva ?\n ?\n))))
 
 (defun sanskrit--replace-match (regex function)
   (save-excursion
@@ -275,9 +276,7 @@
   ;; TODO: <ab>, [Page], title tweaks, leading dot
   (save-excursion
     (when (re-search-forward "^[^¦]+¦ " nil t)
-      (replace-match "")
-      (forward-line)
-      (insert ?\n)))
+      (replace-match "")))
   (sanskrit--replace-match "{#\\([^#]+\\)#}" #'sanskrit-slp1-to-iast)
   (sanskrit--replace-match
    "{%\\([^%]+\\)%}"
