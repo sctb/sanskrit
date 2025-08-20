@@ -192,7 +192,7 @@
 (defcustom sanskrit-dictionary-file
   (let ((file (or load-file-name (buffer-file-name))))
     (concat (file-name-directory file) "ap.txt"))
-  "Path to the ap.txt dictionary file"
+  "Path to the dictionary file"
   :type 'string)
 
 (defun sanskrit--dictionary-index-file ()
@@ -267,13 +267,15 @@
       (insert word)
       (insert " " deva ?\n ?\n))))
 
-(defun sanskrit--replace-match (regex function)
+(defun sanskrit--replace-match (regex new)
   (save-excursion
     (while (re-search-forward regex nil t)
-      (replace-match (funcall function (match-string 1))))))
+      (let ((string (if (functionp new)
+			(funcall new (match-string 1))
+		      new)))
+	(replace-match string)))))
 
 (defun sanskrit--dictionary-process-entry ()
-  ;; TODO: <ab>, [Page], title tweaks, leading dot
   (save-excursion
     (when (re-search-forward "^[^¦]+¦ " nil t)
       (replace-match "")))
@@ -289,7 +291,13 @@
   (sanskrit--replace-match
    "<ls[^>]*>\\([^<]+\\)</ls>"
    (lambda (string)
-     (sanskrit--make-face string 'shadow))))
+     (sanskrit--make-face string 'shadow)))
+  (sanskrit--replace-match
+   "<ab[^>]*>\\([^<]+\\)</ab>"
+   (lambda (string)
+     (sanskrit--make-face string 'link)))
+  (sanskrit--replace-match "\\[Page.*\n" "")
+  (sanskrit--replace-match "^\\." ""))
 
 (defun sanskrit--dictionary-show-entry (word)
   (unless (hash-table-p sanskrit--dictionary-index)
