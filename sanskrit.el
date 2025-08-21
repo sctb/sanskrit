@@ -6,18 +6,6 @@
   :prefix "sanskrit-"
   :group 'editing)
 
-(defvar sanskrit-input-method "sanskrit-postfix"
-  "Name of the QUAIL-based input method for writing IAST")
-
-(defun sanskrit-toggle-input-method ()
-  (interactive)
-  (if (equal current-input-method sanskrit-input-method)
-      (progn
-        (set-input-method nil)
-        (message "Sanskrit input disabled"))
-    (set-input-method sanskrit-input-method)
-    (message "Sanskrit input enabled")))
-
 (defvar sanskrit-mode-map (make-sparse-keymap)
   "Keymap for the Sanskrit minor mode")
 
@@ -25,6 +13,9 @@
   "Toggle Sanskrit mode"
   :init-value nil
   :lighter " Sanskrit")
+
+(defvar sanskrit-input-method "sanskrit-postfix"
+  "Name of the QUAIL-based input method for writing IAST")
 
 (quail-define-package
  sanskrit-input-method "UTF-8" "InR<" t
@@ -54,6 +45,15 @@
  ;; dandas
  ("|" "।") ("||" "॥"))
 
+(defun sanskrit-toggle-input-method ()
+  (interactive)
+  (if (equal current-input-method sanskrit-input-method)
+      (progn
+        (set-input-method nil)
+        (message "Sanskrit input disabled"))
+    (set-input-method sanskrit-input-method)
+    (message "Sanskrit input enabled")))
+
 (defvar sanskrit--consonants
   ;; unvoiced    aspirated     voiced      voiced/asp   nasal
   '(("k" . "क") ("kh" . "ख") ("g" . "ग") ("gh" . "घ") ("ṅ" . "ङ") ; velar
@@ -61,7 +61,7 @@
     ("ṭ" . "ट") ("ṭh" . "ठ") ("ḍ" . "ड") ("ḍh" . "ढ") ("ṇ" . "ण") ; retroflex
     ("t" . "त") ("th" . "थ") ("d" . "द") ("dh" . "ध") ("n" . "न") ; dental
     ("p" . "प") ("ph" . "फ") ("b" . "ब") ("bh" . "भ") ("m" . "म") ; labial
-    ("y" . "य") ("r" . "र") ("l" . "ल") ("v" . "व") ; semi-vowels
+    ("y" . "य") ("r" . "र") ("l" . "ल") ("v" . "व")   ; semi-vowels
     ("ś" . "श") ("ṣ" . "ष") ("s" . "स") ("h" . "ह")))  ; sibilants and h
 
 (defvar sanskrit--consonant-chars
@@ -277,7 +277,7 @@
 
 (defun sanskrit--dictionary-process-entry ()
   (save-excursion
-    (when (re-search-forward "^[^¦]+¦ " nil t)
+    (when (re-search-forward "^[^¦]+¦[ ]*\n?" nil t)
       (replace-match "")))
   (sanskrit--replace-match "{#\\([^#]+\\)#}" #'sanskrit-slp1-to-iast)
   (sanskrit--replace-match
