@@ -153,7 +153,7 @@
         (error "Unrecognized vowel: %s" string))))
 
 (defun sanskrit-render (string)
-  "Render ‘string’ in IAST format to Devanāgarī"
+  "Render ‘string’ in IAST format to Devanāgarī script"
   (let ((string (downcase string))
         (list nil)
         (len (length string))
@@ -244,8 +244,8 @@
       (sanskrit--index-dictionary))
     (let ((index (make-hash-table :test 'equal)))
       (with-temp-buffer
-	(insert-file-contents file)
-	(while-let ((entry (sanskrit--dictionary-index-read-entry)))
+        (insert-file-contents file)
+        (while-let ((entry (sanskrit--dictionary-index-read-entry)))
           (puthash (car entry) (cdr entry) index)))
       (setq sanskrit--dictionary-index index)
       (message "Loaded %s entries" (hash-table-count index)))))
