@@ -15,16 +15,16 @@
   :lighter " Sanskrit")
 
 (define-derived-mode sanskrit-dictionary-mode special-mode "Dictionary"
-  "Major mode for viewing Sanskrit dictionary entries."
+  "Major mode for viewing Sanskrit dictionary entries"
   (sanskrit-mode +1))
 
 (defface sanskrit-headword
   '((t :height 1.1 :inherit font-lock-keyword-face))
-  "Faced use for the headword in a dictionary entry.")
+  "Faced use for the headword in a dictionary entry")
 
 (defface sanskrit-abbrev
   '((t :inherit shadow))
-  "Face used for abbreviations and references in a dictionary entry.")
+  "Face used for abbreviations and references in a dictionary entry")
 
 (defvar sanskrit-input-method "sanskrit-postfix"
   "Name of the QUAIL-based input method for writing IAST")
