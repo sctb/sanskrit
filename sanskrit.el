@@ -22,9 +22,9 @@
   '((t :height 1.1 :inherit font-lock-keyword-face))
   "Faced use for the headword in a dictionary entry")
 
-(defface sanskrit-abbrev
+(defface sanskrit-reference
   '((t :inherit shadow))
-  "Face used for abbreviations and references in a dictionary entry")
+  "Face used for references and abbreviations in a dictionary entry")
 
 (defface sanskrit-numeral
   '((t :inherit font-lock-type-face))
@@ -306,11 +306,11 @@
   (sanskrit--replace-match
    "<ls[^>]*>\\([^<]+\\)</ls>"
    (lambda (string)
-     (sanskrit--make-face string 'sanskrit-abbrev)))
+     (sanskrit--make-face string 'sanskrit-reference)))
   (sanskrit--replace-match
    "<ab[^>]*>\\([^<]+\\)</ab>"
    (lambda (string)
-     (sanskrit--make-face string 'sanskrit-abbrev)))
+     (sanskrit--make-face string 'sanskrit-reference)))
   (sanskrit--replace-match "\\[Page.*\n" "")
   (sanskrit--replace-match "^\\." "")
   (sanskrit--replace-match
