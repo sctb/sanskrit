@@ -26,6 +26,10 @@
   '((t :inherit shadow))
   "Face used for abbreviations and references in a dictionary entry")
 
+(defface sanskrit-item-number
+  '((t :inherit font-lock-type-face))
+  "Face used for the item number in a dictionary entry")
+
 (defvar sanskrit-input-method "sanskrit-postfix"
   "Name of the QUAIL-based input method for writing IAST")
 
@@ -308,7 +312,12 @@
    (lambda (string)
      (sanskrit--make-face string 'sanskrit-abbrev)))
   (sanskrit--replace-match "\\[Page.*\n" "")
-  (sanskrit--replace-match "^\\." ""))
+  (sanskrit--replace-match "^\\." "")
+  (sanskrit--replace-match
+   "^[²³]\\([[:digit:]]+\\) "
+   (lambda (string)
+     (let ((string (concat string ". ")))
+       (sanskrit--make-face string 'sanskrit-item-number)))))
 
 (defun sanskrit--ensure-dictionary-index ()
   (unless (hash-table-p sanskrit--dictionary-index)
