@@ -14,6 +14,10 @@
   :init-value nil
   :lighter " Sanskrit")
 
+(define-derived-mode sanskrit-dictionary-mode special-mode "Dictionary"
+  "Major mode for viewing Sanskrit dictionary entries."
+  (sanskrit-mode +1))
+
 (defface sanskrit-headword
   '((t :height 1.1 :inherit font-lock-keyword-face))
   "Faced use for the headword in a dictionary entry.")
@@ -193,9 +197,8 @@
   (interactive "r")
   (let* ((region (buffer-substring point mark))
          (string (sanskrit-render (string-trim region))))
-    ;; (pop-to-buffer "*Sanskrit*")
-    ;; (insert string)
-    (kill-new string)))
+    (kill-new string)
+    (message "Copied: %s" string)))
 
 (defcustom sanskrit-dictionary-file
   (let ((file (or load-file-name (buffer-file-name))))
@@ -319,10 +322,13 @@
         (let ((file sanskrit-dictionary-file)
               (buffer (get-buffer-create "*Dictionary entry*")))
           (with-current-buffer buffer
+	    (fundamental-mode)
+	    (setq buffer-read-only nil)
             (insert-file-contents file nil beg end t)
 	    (goto-char (point-min))
 	    (sanskrit--dictionary-process-entry)
 	    (sanskrit--dictionary-entry-header word)
+	    (sanskrit-dictionary-mode)
 	    (pop-to-buffer buffer))))
     (message "No entry found for ‘%s’" word)))
 
