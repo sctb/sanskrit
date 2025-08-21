@@ -26,7 +26,7 @@
   '((t :inherit shadow))
   "Face used for abbreviations and references in a dictionary entry")
 
-(defface sanskrit-item-number
+(defface sanskrit-numeral
   '((t :inherit font-lock-type-face))
   "Face used for the item number in a dictionary entry")
 
@@ -317,7 +317,7 @@
    "^[²³]\\([[:digit:]]+\\) "
    (lambda (string)
      (let ((string (concat string ". ")))
-       (sanskrit--make-face string 'sanskrit-item-number)))))
+       (sanskrit--make-face string 'sanskrit-numeral)))))
 
 (defun sanskrit--ensure-dictionary-index ()
   (unless (hash-table-p sanskrit--dictionary-index)
