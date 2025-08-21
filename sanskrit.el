@@ -14,6 +14,14 @@
   :init-value nil
   :lighter " Sanskrit")
 
+(defface sanskrit-headword
+  '((t :height 1.1 :inherit font-lock-keyword-face))
+  "Faced use for the headword in a dictionary entry.")
+
+(defface sanskrit-abbrev
+  '((t :inherit shadow))
+  "Face used for abbreviations and references in a dictionary entry.")
+
 (defvar sanskrit-input-method "sanskrit-postfix"
   "Name of the QUAIL-based input method for writing IAST")
 
@@ -261,11 +269,12 @@
 
 (defun sanskrit--dictionary-entry-header (word)
   (let* ((word (sanskrit-slp1-to-iast word))
-	 (deva (sanskrit-render word)))
+	 (deva (sanskrit-render word))
+	 (text (concat word " " deva)))
     (save-excursion
-      (sanskrit--make-face word 'match)
-      (insert word)
-      (insert " " deva ?\n ?\n))))
+      (sanskrit--make-face text 'sanskrit-headword)
+      (insert text)
+      (insert ?\n ?\n))))
 
 (defun sanskrit--replace-match (regex new)
   (save-excursion
@@ -291,11 +300,11 @@
   (sanskrit--replace-match
    "<ls[^>]*>\\([^<]+\\)</ls>"
    (lambda (string)
-     (sanskrit--make-face string 'shadow)))
+     (sanskrit--make-face string 'sanskrit-abbrev)))
   (sanskrit--replace-match
    "<ab[^>]*>\\([^<]+\\)</ab>"
    (lambda (string)
-     (sanskrit--make-face string 'shadow)))
+     (sanskrit--make-face string 'sanskrit-abbrev)))
   (sanskrit--replace-match "\\[Page.*\n" "")
   (sanskrit--replace-match "^\\." ""))
 
