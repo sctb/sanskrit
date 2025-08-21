@@ -92,7 +92,7 @@
 
 (defvar sanskrit--vowel-signs
   '(("ā" . "ा") ("i" . "ि") ("ī" . "ी") ("u" . "ु") ("ū" . "ू")
-    ("ṛ" . "ृ") ("ṝ" . "ॄ")
+    ("ṛ" . "ृ") ("ṝ" . "ॄ") ("ḷ" . "ॢ")
     ("e" . "े") ("ai" . "ै") ("o" . "ो") ("au" . "ौ")))
 
 (defvar sanskrit--virama "्")
@@ -407,7 +407,8 @@
     (should (equal (sanskrit-render "Ānanda-śakti") "आनन्दशक्ति"))
     (should (equal (sanskrit-render "vāk\n0") "वाक्\n०"))
     (should (equal (sanskrit-render "citiḥ") "चितिः"))
-    (should (equal (sanskrit-render "siddhi") "सिद्धि")))
+    (should (equal (sanskrit-render "siddhi") "सिद्धि"))
+    (should (equal (sanskrit-render "kḷp") "कॢप्")))
 
   (ert-deftest sanskrit-slp1-to-iast ()
     (should (equal (sanskrit-slp1-to-iast "a") "a"))
