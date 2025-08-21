@@ -35,12 +35,12 @@
  nil t nil nil nil nil nil nil nil nil t)
 
 (quail-define-rules
- ;; macron
+ ;; long vowels
  ("aa" "ā") ("Aa" "Ā") ("AA" "Ā")
  ("ii" "ī") ("Ii" "Ī") ("II" "Ī")
  ("uu" "ū") ("Uu" "Ū") ("UU" "Ū")
  ("rr." "ṝ") ("Rr." "Ṝ") ("RR." "Ṝ")
- ;; dot below
+ ;; retroflex
  ("r." "ṛ") ("R." "Ṛ")
  ("l." "ḷ") ("L." "Ḷ")
  ("m." "ṃ") ("M." "Ṃ")
@@ -51,7 +51,6 @@
  ("s." "ṣ") ("S." "Ṣ")
  ;; diacritic above
  ("n'" "ṅ") ("N'" "Ṅ")
- ("m'" "ṁ") ("M'" "Ṁ")
  ("s'" "ś") ("S'" "Ś")
  ("n~" "ñ") ("N~" "Ñ")
  ;; dandas
@@ -73,8 +72,8 @@
     ("ṭ" . "ट") ("ṭh" . "ठ") ("ḍ" . "ड") ("ḍh" . "ढ") ("ṇ" . "ण") ; retroflex
     ("t" . "त") ("th" . "थ") ("d" . "द") ("dh" . "ध") ("n" . "न") ; dental
     ("p" . "प") ("ph" . "फ") ("b" . "ब") ("bh" . "भ") ("m" . "म") ; labial
-    ("y" . "य") ("r" . "र") ("l" . "ल") ("v" . "व")   ; semi-vowels
-    ("ś" . "श") ("ṣ" . "ष") ("s" . "स") ("h" . "ह")))  ; sibilants and h
+    ("y" . "य") ("r" . "र") ("l" . "ल") ("v" . "व")	; semi-vowels
+    ("ś" . "श") ("ṣ" . "ष") ("s" . "स") ("h" . "ह")))	; sibilants and h
 
 (defvar sanskrit--consonant-chars
   "kgṅcjñṭḍṇtdnpbmyrlvśṣsh")
@@ -85,7 +84,7 @@
     ("e" . "ए") ("ai" . "ऐ") ("o" . "ओ") ("au" . "औ")))
 
 (defvar sanskrit--vowel-chars
-  "aāiīuūṛṝeo")
+  "aāiīuūṛṝḷeo")
 
 (defvar sanskrit--signs
   ;; anusvāra   visarga
