@@ -29,7 +29,7 @@
 (defface sanskrit-numeral
   '((t :inherit font-lock-type-face))
   "Face used for the item number in a dictionary entry")
-
+
 (defvar sanskrit-input-method "sanskrit-postfix"
   "Name of the QUAIL-based input method for writing IAST")
 
@@ -68,7 +68,7 @@
         (message "Sanskrit input disabled"))
     (set-input-method sanskrit-input-method)
     (message "Sanskrit input enabled")))
-
+
 (defvar sanskrit--consonants
   ;; unvoiced    aspirated     voiced      voiced/asp   nasal
   '(("k" . "क") ("kh" . "ख") ("g" . "ग") ("gh" . "घ") ("ṅ" . "ङ") ; velar
@@ -206,7 +206,7 @@
          (string (sanskrit-render (string-trim region))))
     (kill-new string)
     (message "Copied: %s" string)))
-
+
 (defcustom sanskrit-dictionary-file
   (let ((file (or load-file-name (buffer-file-name))))
     (concat (file-name-directory file) "ap.txt"))
@@ -361,7 +361,7 @@
 	 (first (car (split-string word "-")))
 	 (slp1 (sanskrit-iast-to-slp1 first)))
     (sanskrit--dictionary-show-entry slp1)))
-
+
 (defvar sanskrit--slp1
   '(("a" . "a") ("ā" . "A")  ("i" . "i") ("ī" . "I") ("u" . "u") ("ū" . "U")
     ("ṛ" . "f") ("ṝ" . "F")  ("ḷ" . "x")
@@ -401,7 +401,7 @@
 	     (pair (rassoc key sanskrit--slp1)))
         (push (or (car pair) key) list)))
     (string-join (nreverse list))))
-
+
 (when (featurep 'ert)
   (ert-deftest sanskrit-render ()
     (should (equal (sanskrit-render "a") "अ"))
