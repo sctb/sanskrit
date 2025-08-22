@@ -316,16 +316,15 @@
    (lambda (string)
      (sanskrit--make-face string 'sanskrit-reference)))
   (sanskrit--replace-match "\\[Page.*\n" "")
-  (sanskrit--replace-match "^\\." "")
+  (sanskrit--replace-match "^\\.³?" "")
   (sanskrit--replace-match
    "€\\([^ ]+ \\)"
    (lambda (string)
      (sanskrit--make-face string 'sanskrit-reference)))
   (sanskrit--replace-match
-   "^[²³]\\([[:digit:]]+\\) "
+   "^²\\([[:digit:]]+\\)"
    (lambda (string)
-     (let ((string (concat string ". ")))
-       (sanskrit--make-face string 'sanskrit-numeral)))))
+     (sanskrit--make-face string 'sanskrit-numeral))))
 
 (defun sanskrit--ensure-dictionary-index ()
   (unless (hash-table-p sanskrit--dictionary-index)
