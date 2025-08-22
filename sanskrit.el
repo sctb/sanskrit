@@ -118,7 +118,11 @@
   (memq char '(?\s ?- ?। ?॥ ?\n)))
 
 (defun sanskrit--span (string i matcher)
-  (seq-take-while matcher (substring string i)))
+  (let ((j i)
+	(len (length string)))
+    (while (and (< j len) (funcall matcher (aref string j)))
+      (incf j))
+    (substring string i j)))
 
 (defun sanskrit--take-1 (string i)
   (string (aref string i)))
@@ -276,10 +280,10 @@
 (defun sanskrit--dictionary-entry-header (word)
   (let* ((word (sanskrit-slp1-to-iast word))
 	 (deva (sanskrit-render word))
-	 (text (concat word " " deva)))
+	 (string (concat word " " deva)))
     (save-excursion
-      (sanskrit--make-face text 'sanskrit-headword)
-      (insert text)
+      (sanskrit--make-face string 'sanskrit-headword)
+      (insert string)
       (insert ?\n ?\n))))
 
 (defun sanskrit--replace-match (regex new)
