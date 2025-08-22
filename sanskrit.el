@@ -95,7 +95,7 @@
   '((?ṃ . "ं") (?ḥ . "ः")))
 
 (defvar sanskrit--vowel-signs
-  '(("ā" . "ा") ("i" . "ि") ("ī" . "ी") ("u" . "ु") ("ū" . "ू")
+  '(("a" . "") ("ā" . "ा") ("i" . "ि") ("ī" . "ी") ("u" . "ु") ("ū" . "ू")
     ("ṛ" . "ृ") ("ṝ" . "ॄ") ("ḷ" . "ॢ")
     ("e" . "े") ("ai" . "ै") ("o" . "ो") ("au" . "ौ")))
 
@@ -173,7 +173,6 @@
                  (push sanskrit--virama list))
                (unless (eq c ?-)
                  (push (string c) list)))
-              ((and consnt (eq c ?a)))
               ((sanskrit--sign-p c)
                (push (alist-get c sanskrit--signs) list))
               ((sanskrit--vowel-p c)
@@ -428,7 +427,8 @@
     (should (equal (sanskrit-render "vāk\n0") "वाक्\n०"))
     (should (equal (sanskrit-render "citiḥ") "चितिः"))
     (should (equal (sanskrit-render "siddhi") "सिद्धि"))
-    (should (equal (sanskrit-render "kḷp") "कॢप्")))
+    (should (equal (sanskrit-render "kḷp") "कॢप्"))
+    (should (equal (sanskrit-render "svabhittau") "स्वभित्तौ")))
 
   (ert-deftest sanskrit-slp1-to-iast ()
     (should (equal (sanskrit-slp1-to-iast "a") "a"))
