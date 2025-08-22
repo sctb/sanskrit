@@ -318,6 +318,10 @@
   (sanskrit--replace-match "\\[Page.*\n" "")
   (sanskrit--replace-match "^\\." "")
   (sanskrit--replace-match
+   "€\\([^ ]+ \\)"
+   (lambda (string)
+     (sanskrit--make-face string 'sanskrit-reference)))
+  (sanskrit--replace-match
    "^[²³]\\([[:digit:]]+\\) "
    (lambda (string)
      (let ((string (concat string ". ")))
@@ -326,6 +330,9 @@
 (defun sanskrit--ensure-dictionary-index ()
   (unless (hash-table-p sanskrit--dictionary-index)
     (sanskrit--dictionary-read-index)))
+
+(defvar sanskrit-dictionary-history nil
+  "History for input to ‘sanskrit-dictionary-lookup’")
 
 (defun sanskrit--dictionary-show-entry (word)
   (sanskrit--ensure-dictionary-index)
@@ -351,7 +358,8 @@
      (sanskrit--ensure-dictionary-index)
      (list (completing-read
 	    "Dictionary lookup (SLP1): "
-	    sanskrit--dictionary-index))))
+	    sanskrit--dictionary-index
+	    nil t nil 'sanskrit-dictionary-history))))
   (sanskrit--dictionary-show-entry word))
 
 (defun sanskrit-dictionary-lookup-current-word ()
