@@ -298,7 +298,7 @@ TYPE must be either :AP or :MW"
 (defun sanskrit--dictionary-process-entry ()
   (sanskrit--replace-match "^¦" "")
   (sanskrit--replace-match " ¦ " " ")
-  (sanskrit--replace-match "¦ " ": ")
+  (sanskrit--replace-match "¦ ?" ": ")
   (sanskrit--replace-match "\\[Page.*\n")
   (sanskrit--replace-match "^\\.³?")
   (sanskrit--replace-match "<srs/>")
