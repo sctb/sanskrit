@@ -352,21 +352,13 @@
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
-   (progn
+   (let ((init (sanskrit-iast-to-slp1 (current-word))))
      (sanskrit--ensure-dictionary-index)
      (list (completing-read
 	    "Dictionary lookup (SLP1): "
 	    sanskrit--dictionary-index
-	    nil t nil 'sanskrit-dictionary-history))))
+	    nil t init 'sanskrit-dictionary-history))))
   (sanskrit--dictionary-show-entry word))
-
-(defun sanskrit-dictionary-lookup-current-word ()
-  "Look up the current word in IAST format in the dictionary"
-  (interactive)
-  (let* ((word (current-word))
-	 (first (car (split-string word "-")))
-	 (slp1 (sanskrit-iast-to-slp1 first)))
-    (sanskrit--dictionary-show-entry slp1)))
 
 (defvar sanskrit--slp1
   '(("a" . "a") ("ā" . "A")  ("i" . "i") ("ī" . "I") ("u" . "u") ("ū" . "U")
