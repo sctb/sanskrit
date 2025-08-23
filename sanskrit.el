@@ -26,6 +26,10 @@
   '((t :inherit shadow))
   "Face used for references and abbreviations in a dictionary entry")
 
+(defface sanskrit-homonym
+  '((t :inherit font-lock-builtin-face))
+  "Face used to indicate homonyms in a dictionary entry")
+
 (defface sanskrit-numeral
   '((t :inherit font-lock-type-face))
   "Face used for the item number in a dictionary entry")
@@ -265,6 +269,10 @@ TYPE must be either :AP or :MW"
   (put-text-property 0 (length string) 'face face string)
   string)
 
+(defun sanskrit--face-maker (face)
+  (lambda (string)
+    (sanskrit--make-face string face)))
+
 (defun sanskrit--dictionary-entry-header (word)
   (let* ((word (sanskrit-slp1-to-iast word))
 	 (deva (sanskrit-render word))
@@ -288,41 +296,34 @@ TYPE must be either :AP or :MW"
       (sanskrit--replace-match regex function))))
 
 (defun sanskrit--dictionary-process-entry ()
-  ;; TODO
-  ;;   <s>SLP1</s>
-  ;;   <s1>IAST</s1>
-  ;;   <info .../>
-  ;;   <bot>...</bot>
-  ;;   <ns>...</ns>
-  ;;   <lex>...</lex>
-  (sanskrit--replace-match "¦")
+  (sanskrit--replace-match "^¦" "")
+  (sanskrit--replace-match " ¦ " " ")
+  (sanskrit--replace-match "¦ " ": ")
   (sanskrit--replace-match "\\[Page.*\n")
   (sanskrit--replace-match "^\\.³?")
+  (sanskrit--replace-match "<srs/>")
+  (sanskrit--replace-match "<shortlong/>")
   (sanskrit--replace-match "{#\\([^#]+\\)#}" #'sanskrit-slp1-to-iast)
+  (sanskrit--replace-tag "s" #'sanskrit-slp1-to-iast)
+  (sanskrit--replace-tag "s1" #'identity)
+  (sanskrit--replace-match "<info[^>]*>")
   (sanskrit--replace-match
-   "{%\\([^%]+\\)%}"
-   (lambda (string)
-     (sanskrit--make-face string 'italic)))
+   "{%\\([^%]+\\)%}" (sanskrit--face-maker 'italic))
   (sanskrit--replace-match
-   "{@\\([^@]+\\)@}"
-   (lambda (string)
-     (sanskrit--make-face string 'bold)))
+   "{@\\([^@]+\\)@}" (sanskrit--face-maker 'bold))
   (sanskrit--replace-match
-   "€\\([^ ]+ \\)"
-   (lambda (string)
-     (sanskrit--make-face string 'sanskrit-reference)))
+   "€\\([^ ]+ \\)" (sanskrit--face-maker 'sanskrit-reference))
   (sanskrit--replace-match
-   "^²\\([[:digit:]]+\\)"
-   (lambda (string)
-     (sanskrit--make-face string 'sanskrit-numeral)))
-  (sanskrit--replace-tag
-   "ls"
-   (lambda (string)
-     (sanskrit--make-face string 'sanskrit-reference)))
-  (sanskrit--replace-tag
-   "ab"
-   (lambda (string)
-     (sanskrit--make-face string 'sanskrit-reference))))
+   "^²\\([[:digit:]]+\\)" (sanskrit--face-maker 'sanskrit-numeral))
+  (sanskrit--replace-tag "ls" (sanskrit--face-maker 'sanskrit-reference))
+  (sanskrit--replace-tag "ab" (sanskrit--face-maker 'sanskrit-reference))
+  (sanskrit--replace-tag "ns" (sanskrit--face-maker 'sanskrit-reference))
+  (sanskrit--replace-tag "hom" (sanskrit--face-maker 'sanskrit-homonym))
+  (sanskrit--replace-tag "lex" (sanskrit--face-maker 'italic))
+  (sanskrit--replace-tag "bot" (sanskrit--face-maker 'italic))
+  (sanskrit--replace-tag "bio" (sanskrit--face-maker 'italic))
+  (sanskrit--replace-tag "etym" (sanskrit--face-maker 'italic))
+  (sanskrit--replace-tag "lang" (sanskrit--face-maker 'italic)))
 
 (defun sanskrit--ensure-dictionary-index ()
   (unless (hash-table-p sanskrit--dictionary-index)
@@ -354,7 +355,7 @@ TYPE must be either :AP or :MW"
 	      (pcase (sanskrit--dictionary-file-type file)
 		(:ap (sanskrit--insert-range file beg end)
 		     (insert ?\n))
-		(:mw (let ((number (format "²%d" (incf i))))
+		(:mw (let ((number (format "²%d " (incf i))))
 		       (insert number))
 		     (sanskrit--insert-range file beg end))))))
 	(goto-char (point-min))
