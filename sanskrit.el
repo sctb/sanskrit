@@ -206,24 +206,33 @@
     (kill-new string)
     (message "Copied: %s" string)))
 
-(defcustom sanskrit-dictionary-file
+(defun sanskrit--relative-file (path)
   (let ((file (or load-file-name (buffer-file-name))))
-    (concat (file-name-directory file) "ap.txt"))
-  "Path to the dictionary file"
-  :type 'string)
+    (concat (file-name-directory file) path)))
 
-(defun sanskrit--dictionary-index-file ()
-  (concat sanskrit-dictionary-file ".index"))
+(defcustom sanskrit-dictionary-files
+  (list (list (sanskrit--relative-file "ap.txt") :ap
+	      "Apte Practical Sanskrit-English Dictionary")
+	(list (sanskrit--relative-file "mw.txt") :mw
+	      "Monier-Williams Sanskrit-English Dictionary"))
+  "List of (PATH TYPE DESCRIPTION) for each dictionary file.
+TYPE must be one of :AP, :MW, or :RAW"
+  :type '(list string symbol string))
+
+(defun sanskrit--dictionary-file-type (file)
+  (cadr (assoc file sanskrit-dictionary-files)))
+
+(defun sanskrit--dictionary-index-file (file)
+  (concat file ".index"))
 
 (defvar sanskrit--dictionary-index nil)
 
-(defun sanskrit--index-dictionary ()
-  (with-temp-file (sanskrit--dictionary-index-file)
+(defun sanskrit--index-dictionary (file)
+  (with-temp-file (sanskrit--dictionary-index-file file)
     (let ((output (current-buffer))
-          (input sanskrit-dictionary-file)
           (n 0))
       (with-temp-buffer
-        (insert-file-contents input)
+        (insert-file-contents file)
         (while (re-search-forward "<L>" nil t)
           (re-search-forward "<k1>\\(.*\\)<k2>")
           (let ((word (match-string 1)))
@@ -236,41 +245,21 @@
                 (incf n))))))
       (message "Indexed %d entries" n))))
 
-(defun sanskrit--dictionary-index-read-entry ()
+(defun sanskrit--dictionary-index-read-form ()
   (condition-case nil
       (read (current-buffer))
     (end-of-file nil)))
 
-(defun sanskrit--dictionary-read-index ()
-  (let ((file (sanskrit--dictionary-index-file)))
-    (unless (file-exists-p file)
-      (sanskrit--index-dictionary))
-    (let ((index (make-hash-table :test 'equal)))
-      (with-temp-buffer
-        (insert-file-contents file)
-        (while-let ((entry (sanskrit--dictionary-index-read-entry)))
-          (puthash (car entry) (cdr entry) index)))
-      (setq sanskrit--dictionary-index index)
-      (message "Loaded %s entries" (hash-table-count index)))))
-
-(defun sanskrit--visarga-p (word)
-  (equal (substring word -1) "H"))
-
-(defun sanskrit--with-visarga (word)
-  (unless (sanskrit--visarga-p word)
-    (concat word "H")))
-
-(defun sanskrit--without-visarga (word)
-  (when (sanskrit--visarga-p word)
-    (substring word 0 (1- (length word)))))
-
-(defun sanskrit--dictionary-index-lookup (word)
-  (let ((get (lambda (w)
-	       (when-let* ((entry (gethash w sanskrit--dictionary-index)))
-		 (cons w entry)))))
-    (or (funcall get word)
-	(funcall get (sanskrit--with-visarga word))
-	(funcall get (sanskrit--without-visarga word)))))
+(defun sanskrit--dictionary-read-index (file)
+  (let ((index (sanskrit--dictionary-index-file file)))
+    (unless (file-exists-p index)
+      (sanskrit--index-dictionary file))
+    (with-temp-buffer
+      (insert-file-contents index)
+      (while-let ((form (sanskrit--dictionary-index-read-form)))
+	(pcase-let ((`(,word . ,location) form))
+	  (let ((entry (cons file location)))
+	    (push entry (gethash word sanskrit--dictionary-index))))))))
 
 (defun sanskrit--make-face (string face)
   (put-text-property 0 (length string) 'face face string)
@@ -285,18 +274,25 @@
       (insert string)
       (insert ?\n ?\n))))
 
-(defun sanskrit--replace-match (regex new)
+(defun sanskrit--replace-match (regex &optional new)
   (save-excursion
     (while (re-search-forward regex nil t)
       (let ((string (if (functionp new)
 			(funcall new (match-string 1))
-		      new)))
+		      (or new ""))))
 	(replace-match string)))))
 
 (defun sanskrit--dictionary-process-entry ()
-  (save-excursion
-    (when (re-search-forward "^[^¦]+¦[ ]*\n?" nil t)
-      (replace-match "")))
+  ;; TODO: sanskrit--replace-tag?
+  ;;   <s>SLP1</s>
+  ;;   <s1>IAST</s1>
+  ;;   <info .../>
+  ;;   <bot>...</bot>
+  ;;   <ns>...</ns>
+  ;;   <lex>...</lex>
+  (sanskrit--replace-match "¦")
+  (sanskrit--replace-match "\\[Page.*\n")
+  (sanskrit--replace-match "^\\.³?")
   (sanskrit--replace-match "{#\\([^#]+\\)#}" #'sanskrit-slp1-to-iast)
   (sanskrit--replace-match
    "{%\\([^%]+\\)%}"
@@ -314,8 +310,6 @@
    "<ab[^>]*>\\([^<]+\\)</ab>"
    (lambda (string)
      (sanskrit--make-face string 'sanskrit-reference)))
-  (sanskrit--replace-match "\\[Page.*\n" "")
-  (sanskrit--replace-match "^\\.³?" "")
   (sanskrit--replace-match
    "€\\([^ ]+ \\)"
    (lambda (string)
@@ -327,26 +321,42 @@
 
 (defun sanskrit--ensure-dictionary-index ()
   (unless (hash-table-p sanskrit--dictionary-index)
-    (sanskrit--dictionary-read-index)))
+    (setq sanskrit--dictionary-index (make-hash-table :test 'equal))
+    (dolist (file (mapcar #'car sanskrit-dictionary-files))
+      (sanskrit--dictionary-read-index file))))
 
 (defvar sanskrit-dictionary-history nil
   "History for input to ‘sanskrit-dictionary-lookup’")
 
+(defun sanskrit--dictionary-buffer ()
+  (with-current-buffer (get-buffer-create "*Dictionary entry*")
+    (fundamental-mode)
+    (setq buffer-read-only nil)
+    (erase-buffer)
+    (current-buffer)))
+
+(defun sanskrit--insert-range (file beg end)
+  (let ((n (cadr (insert-file-contents file nil beg end))))
+    (forward-char n)))
+
 (defun sanskrit--dictionary-show-entry (word)
   (sanskrit--ensure-dictionary-index)
-  (if-let* ((location (sanskrit--dictionary-index-lookup word)))
-      (pcase-let ((`(,word ,beg ,end) location))
-        (let ((file sanskrit-dictionary-file)
-              (buffer (get-buffer-create "*Dictionary entry*")))
-          (with-current-buffer buffer
-	    (fundamental-mode)
-	    (setq buffer-read-only nil)
-            (insert-file-contents file nil beg end t)
-	    (goto-char (point-min))
-	    (sanskrit--dictionary-process-entry)
-	    (sanskrit--dictionary-entry-header word)
-	    (sanskrit-dictionary-mode)
-	    (pop-to-buffer buffer))))
+  (if-let* ((entries (gethash word sanskrit--dictionary-index)))
+      (with-current-buffer (sanskrit--dictionary-buffer)
+	(let ((i 0))
+	  (dolist (entry (reverse entries))
+	    (pcase-let ((`(,file ,beg ,end) entry))
+	      (pcase (sanskrit--dictionary-file-type file)
+		(:ap (insert ?\n)
+		     (sanskrit--insert-range file beg end))
+		(:mw (let ((number (format "²%d" (incf i))))
+		       (insert number))
+		     (sanskrit--insert-range file beg end))))))
+	(goto-char (point-min))
+	(sanskrit--dictionary-entry-header word)
+	(sanskrit--dictionary-process-entry)
+	(sanskrit-dictionary-mode)
+	(pop-to-buffer (current-buffer)))
     (message "No entry found for ‘%s’" word)))
 
 (defun sanskrit-dictionary-lookup (word)
