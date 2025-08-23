@@ -216,7 +216,7 @@
 	(list (sanskrit--relative-file "mw.txt") :mw
 	      "Monier-Williams Sanskrit-English Dictionary"))
   "List of (PATH TYPE DESCRIPTION) for each dictionary file.
-TYPE must be one of :AP, :MW, or :RAW"
+TYPE must be either :AP or :MW"
   :type '(list string symbol string))
 
 (defun sanskrit--dictionary-file-type (file)
@@ -282,8 +282,13 @@ TYPE must be one of :AP, :MW, or :RAW"
 		      (or new ""))))
 	(replace-match string)))))
 
+(defun sanskrit--replace-tag (tag function)
+  (save-excursion
+    (let ((regex (format "<%s[^>]*>\\([^<]*\\)</%1$s>" tag)))
+      (sanskrit--replace-match regex function))))
+
 (defun sanskrit--dictionary-process-entry ()
-  ;; TODO: sanskrit--replace-tag?
+  ;; TODO
   ;;   <s>SLP1</s>
   ;;   <s1>IAST</s1>
   ;;   <info .../>
@@ -303,21 +308,21 @@ TYPE must be one of :AP, :MW, or :RAW"
    (lambda (string)
      (sanskrit--make-face string 'bold)))
   (sanskrit--replace-match
-   "<ls[^>]*>\\([^<]+\\)</ls>"
-   (lambda (string)
-     (sanskrit--make-face string 'sanskrit-reference)))
-  (sanskrit--replace-match
-   "<ab[^>]*>\\([^<]+\\)</ab>"
-   (lambda (string)
-     (sanskrit--make-face string 'sanskrit-reference)))
-  (sanskrit--replace-match
    "€\\([^ ]+ \\)"
    (lambda (string)
      (sanskrit--make-face string 'sanskrit-reference)))
   (sanskrit--replace-match
    "^²\\([[:digit:]]+\\)"
    (lambda (string)
-     (sanskrit--make-face string 'sanskrit-numeral))))
+     (sanskrit--make-face string 'sanskrit-numeral)))
+  (sanskrit--replace-tag
+   "ls"
+   (lambda (string)
+     (sanskrit--make-face string 'sanskrit-reference)))
+  (sanskrit--replace-tag
+   "ab"
+   (lambda (string)
+     (sanskrit--make-face string 'sanskrit-reference))))
 
 (defun sanskrit--ensure-dictionary-index ()
   (unless (hash-table-p sanskrit--dictionary-index)
@@ -347,8 +352,8 @@ TYPE must be one of :AP, :MW, or :RAW"
 	  (dolist (entry (reverse entries))
 	    (pcase-let ((`(,file ,beg ,end) entry))
 	      (pcase (sanskrit--dictionary-file-type file)
-		(:ap (insert ?\n)
-		     (sanskrit--insert-range file beg end))
+		(:ap (sanskrit--insert-range file beg end)
+		     (insert ?\n))
 		(:mw (let ((number (format "²%d" (incf i))))
 		       (insert number))
 		     (sanskrit--insert-range file beg end))))))
