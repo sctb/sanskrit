@@ -306,7 +306,10 @@ TYPE must be either :AP or :MW"
   (sanskrit--replace-match "{#\\([^#]+\\)#}" #'sanskrit-slp1-to-iast)
   (sanskrit--replace-tag "s" #'sanskrit-slp1-to-iast)
   (sanskrit--replace-tag "s1" #'identity)
+  (sanskrit--replace-tag "gk" #'identity)
   (sanskrit--replace-match "<info[^>]*>")
+  (sanskrit--replace-match "<pb[^>]*>")
+  (sanskrit--replace-match "<div[^>]+> ?" "• ")
   (sanskrit--replace-match
    "{%\\([^%]+\\)%}" (sanskrit--face-maker 'italic))
   (sanskrit--replace-match
