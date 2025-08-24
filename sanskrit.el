@@ -133,8 +133,7 @@
 
 (defun sanskrit--take-2 (string i)
   (if (> (length string) (1+ i))
-      (concat (sanskrit--take-1 string i)
-              (sanskrit--take-1 string (1+ i)))
+      (string (aref string i) (aref string (1+ i)))
     (sanskrit--take-1 string i)))
 
 (defun sanskrit--next-consonant (string i)
@@ -290,10 +289,10 @@ TYPE must be either :AP or :MW"
 		      (or new ""))))
 	(replace-match string)))))
 
-(defun sanskrit--replace-tag (tag function)
+(defun sanskrit--replace-tag (tag &optional new)
   (save-excursion
     (let ((regex (format "<%s[^>]*>\\([^<]*\\)</%1$s>" tag)))
-      (sanskrit--replace-match regex function))))
+      (sanskrit--replace-match regex new))))
 
 (defun sanskrit--dictionary-process-entry ()
   (sanskrit--replace-match "^¦" "")
@@ -322,6 +321,7 @@ TYPE must be either :AP or :MW"
   (sanskrit--replace-tag "ab" (sanskrit--face-maker 'sanskrit-reference))
   (sanskrit--replace-tag "ns" (sanskrit--face-maker 'sanskrit-reference))
   (sanskrit--replace-tag "hom" (sanskrit--face-maker 'sanskrit-homonym))
+  (sanskrit--replace-tag "pcol" (sanskrit--face-maker 'italic))
   (sanskrit--replace-tag "lex" (sanskrit--face-maker 'italic))
   (sanskrit--replace-tag "bot" (sanskrit--face-maker 'italic))
   (sanskrit--replace-tag "bio" (sanskrit--face-maker 'italic))
