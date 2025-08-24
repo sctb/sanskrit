@@ -358,8 +358,7 @@ TYPE must be either :AP or :MW"
 	      (pcase (sanskrit--dictionary-file-type file)
 		(:ap (sanskrit--insert-range file beg end)
 		     (insert ?\n))
-		(:mw (let ((number (format "²%d " (incf i))))
-		       (insert number))
+		(:mw (insert (format "²%d " (incf i)))
 		     (sanskrit--insert-range file beg end))))))
 	(goto-char (point-min))
 	(sanskrit--dictionary-entry-header word)
@@ -371,7 +370,7 @@ TYPE must be either :AP or :MW"
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
-   (let ((init (sanskrit-iast-to-slp1 (current-word))))
+   (let ((init (sanskrit-iast-to-slp1 (or (current-word) ""))))
      (sanskrit--ensure-dictionary-index)
      (list (completing-read
 	    "Dictionary lookup (SLP1): "
