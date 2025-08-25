@@ -28,6 +28,11 @@ configuration.
   (keymap-set map "C-c l" #'sanskrit-dictionary-lookup))
 ```
 
+## Downloading and installing the dictionary
+1. Download the file `ap90txt.zip` from [Cologne University](https://www.sanskrit-lexicon.uni-koeln.de/scans/AP90Scan/2020/web/webtc/download.html)
+2. Extract its contents into this repository directory
+3. Check that `M-: (sanskrit-dictionary-available-p)` is `t`
+
 ## Using the IAST postfix input method
 - Long vowels with a macron are entered by repeating them:
 ```
@@ -52,7 +57,3 @@ n~ ⇒ ñ
 |  ⇒ ।
 || ⇒ ॥
 ```
-
-## Downloading and installing the dictionary
-1. Download the file `ap90txt.zip` from [Cologne University](https://www.sanskrit-lexicon.uni-koeln.de/scans/AP90Scan/2020/web/webtc/download.html)
-2. Extract its contents into this repository directory, or configure the `sanskrit-dictionary-file` variable to point to the location of `ap.txt`

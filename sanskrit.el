@@ -257,17 +257,17 @@
     (end-of-file nil)))
 
 (defun sanskrit--dictionary-read-index ()
-  (unless (hash-table-p sanskrit--dictionary-index)
-    (let ((file (sanskrit--dictionary-index-file))
-	  (index (make-hash-table :test 'equal)))
-      (unless (file-exists-p file)
-	(sanskrit--index-dictionary))
-      (with-temp-buffer
-	(insert-file-contents file)
-	(while-let ((form (sanskrit--dictionary-index-read-form)))
-	  (pcase-let ((`(,word . ,location) form))
-	    (push location (gethash word index))))
-	(setq sanskrit--dictionary-index index)))))
+  (or (hash-table-p sanskrit--dictionary-index)
+      (let ((file (sanskrit--dictionary-index-file))
+	    (index (make-hash-table :test 'equal)))
+	(unless (file-exists-p file)
+	  (sanskrit--index-dictionary))
+	(with-temp-buffer
+	  (insert-file-contents file)
+	  (while-let ((form (sanskrit--dictionary-index-read-form)))
+	    (pcase-let ((`(,word . ,location) form))
+	      (push location (gethash word index))))
+	  (setq sanskrit--dictionary-index index)))))
 
 (defun sanskrit--dictionary-entry-header (word)
   (let* ((word (sanskrit-slp1-to-iast word))
@@ -349,6 +349,11 @@
 	    sanskrit--dictionary-index
 	    nil t init 'sanskrit-dictionary-history))))
   (sanskrit--dictionary-show-entry word))
+
+(defun sanskrit-dictionary-available-p ()
+  (sanskrit--dictionary-read-index)
+  (and (file-exists-p sanskrit-dictionary-file)
+       (hash-table-p sanskrit--dictionary-index)))
 
 (defvar sanskrit--slp1
   '(("a" . "a") ("ā" . "A")  ("i" . "i") ("ī" . "I") ("u" . "u") ("ū" . "U")
