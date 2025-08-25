@@ -16,13 +16,13 @@ configuration.
 
 1. Clone this repository to your local machine
 2. Add the repository to your `load-path` and `require` it:
-```
+```emacs-lisp
 (add-to-list 'load-path "~/path/to/sanskrit")
-(require 'ert) ;; for running tests
+(require 'ert) ;; for running tests (optional)
 (require 'sanskrit)
 ```
 3. Configure your desired keybindings:
-```
+```emacs-lisp
 (let ((map sanskrit-mode-map))
   (keymap-set map "C-c i" #'sanskrit-toggle-input-method)
   (keymap-set map "C-c s" #'sanskrit-render-current-word)
