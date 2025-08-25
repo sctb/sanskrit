@@ -36,6 +36,8 @@ configuration.
 3. Check that `M-: (sanskrit-dictionary-available-p)` is `t`
 
 ## Using the IAST postfix input method
+1. Enable the input method with `M-x sanskrit-toggle-input-method`
+2. To modify a letter, enter its modification character afterwards:
 - Long vowels with a macron are entered by repeating them:
 ```
 aa  ⇒ ā
