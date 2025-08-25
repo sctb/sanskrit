@@ -16,11 +16,20 @@
 
 (define-derived-mode sanskrit-dictionary-mode special-mode "Dictionary"
   "Major mode for viewing Sanskrit dictionary entries"
-  (sanskrit-mode +1))
+  (sanskrit-mode +1)
+  (visual-line-mode +1))
 
 (defface sanskrit-headword
   '((t :height 1.1 :inherit font-lock-keyword-face))
-  "Faced use for the headword in a dictionary entry")
+  "Face use for the headword in a dictionary entry")
+
+(defface sanskrit-italic
+  '((t :inherit italic))
+  "Face used for italicized text in a dictionary entry")
+
+(defface sanskrit-bold
+  '((t :inherit bold))
+  "Face used for bolded text in a dictionary entry")
 
 (defface sanskrit-reference
   '((t :inherit shadow))
@@ -213,29 +222,23 @@
   (let ((file (or load-file-name (buffer-file-name))))
     (concat (file-name-directory file) path)))
 
-(defcustom sanskrit-dictionary-files
-  (list (list (sanskrit--relative-file "ap.txt") :ap
-	      "Apte Practical Sanskrit-English Dictionary")
-	(list (sanskrit--relative-file "mw.txt") :mw
-	      "Monier-Williams Sanskrit-English Dictionary"))
-  "List of (PATH TYPE DESCRIPTION) for each dictionary file.
-TYPE must be either :AP or :MW"
-  :type '(list string symbol string))
+(defcustom sanskrit-dictionary-file
+  (sanskrit--relative-file "ap.txt")
+  "Path to the Sanskrit-English dictionary file"
+  :type 'string)
 
-(defun sanskrit--dictionary-file-type (file)
-  (cadr (assoc file sanskrit-dictionary-files)))
+(defun sanskrit--dictionary-index-file ()
+  (concat sanskrit-dictionary-file ".index"))
 
-(defun sanskrit--dictionary-index-file (file)
-  (concat file ".index"))
+(defvar sanskrit--dictionary-index nil
+  "Hash table of dictionary offsets keyed by word in SLP1 format")
 
-(defvar sanskrit--dictionary-index nil)
-
-(defun sanskrit--index-dictionary (file)
-  (with-temp-file (sanskrit--dictionary-index-file file)
+(defun sanskrit--index-dictionary ()
+  (with-temp-file (sanskrit--dictionary-index-file)
     (let ((output (current-buffer))
           (n 0))
       (with-temp-buffer
-        (insert-file-contents file)
+        (insert-file-contents sanskrit-dictionary-file)
         (while (re-search-forward "<L>" nil t)
           (re-search-forward "<k1>\\(.*\\)<k2>")
           (let ((word (match-string 1)))
@@ -253,24 +256,18 @@ TYPE must be either :AP or :MW"
       (read (current-buffer))
     (end-of-file nil)))
 
-(defun sanskrit--dictionary-read-index (file)
-  (let ((index (sanskrit--dictionary-index-file file)))
-    (unless (file-exists-p index)
-      (sanskrit--index-dictionary file))
-    (with-temp-buffer
-      (insert-file-contents index)
-      (while-let ((form (sanskrit--dictionary-index-read-form)))
-	(pcase-let ((`(,word . ,location) form))
-	  (let ((entry (cons file location)))
-	    (push entry (gethash word sanskrit--dictionary-index))))))))
-
-(defun sanskrit--make-face (string face)
-  (put-text-property 0 (length string) 'face face string)
-  string)
-
-(defun sanskrit--face-maker (face)
-  (lambda (string)
-    (sanskrit--make-face string face)))
+(defun sanskrit--dictionary-read-index ()
+  (unless (hash-table-p sanskrit--dictionary-index)
+    (let ((file (sanskrit--dictionary-index-file))
+	  (index (make-hash-table :test 'equal)))
+      (unless (file-exists-p file)
+	(sanskrit--index-dictionary))
+      (with-temp-buffer
+	(insert-file-contents file)
+	(while-let ((form (sanskrit--dictionary-index-read-form)))
+	  (pcase-let ((`(,word . ,location) form))
+	    (push location (gethash word index))))
+	(setq sanskrit--dictionary-index index)))))
 
 (defun sanskrit--dictionary-entry-header (word)
   (let* ((word (sanskrit-slp1-to-iast word))
@@ -281,58 +278,36 @@ TYPE must be either :AP or :MW"
       (insert string)
       (insert ?\n ?\n))))
 
+(defun sanskrit--make-face (string face)
+  (put-text-property 0 (length string) 'face face string)
+  string)
+
 (defun sanskrit--replace-match (regex &optional new)
   (save-excursion
     (while (re-search-forward regex nil t)
-      (let ((string (if (functionp new)
-			(funcall new (match-string 1))
-		      (or new ""))))
-	(replace-match string)))))
+      (let ((match (match-string 1)))
+	(cond ((null new) (replace-match ""))
+	      ((stringp new) (replace-match new))
+	      ((functionp new) (replace-match (funcall new match)))
+	      ((symbolp new) (replace-match (sanskrit--make-face match new)))
+	      (t (error "Unrecognized replacement: %s" new)))))))
 
 (defun sanskrit--replace-tag (tag &optional new)
-  (save-excursion
-    (let ((regex (format "<%s[^>]*>\\([^<]*\\)</%1$s>" tag)))
-      (sanskrit--replace-match regex new))))
+  (let ((regex (format "<%s[^>]*>\\([^<]*\\)</%1$s>" tag)))
+    (sanskrit--replace-match regex new)))
 
 (defun sanskrit--dictionary-process-entry ()
-  (sanskrit--replace-match "^¦" "")
-  (sanskrit--replace-match " ¦ " " ")
-  (sanskrit--replace-match "¦ ?" ": ")
+  (sanskrit--replace-match "\\^\\([[:digit:]]+\\)¦" 'sanskrit-homonym)
+  (sanskrit--replace-match "¦" ":")
   (sanskrit--replace-match "\\[Page.*\n")
   (sanskrit--replace-match "^\\.³?")
-  (sanskrit--replace-match "<srs/>")
-  (sanskrit--replace-match "<shortlong/>")
   (sanskrit--replace-match "{#\\([^#]+\\)#}" #'sanskrit-slp1-to-iast)
-  (sanskrit--replace-tag "s" #'sanskrit-slp1-to-iast)
-  (sanskrit--replace-tag "s1" #'identity)
-  (sanskrit--replace-tag "gk" #'identity)
-  (sanskrit--replace-match "<info[^>]*>")
-  (sanskrit--replace-match "<pb[^>]*>")
-  (sanskrit--replace-match "<div[^>]+> ?" "• ")
-  (sanskrit--replace-match
-   "{%\\([^%]+\\)%}" (sanskrit--face-maker 'italic))
-  (sanskrit--replace-match
-   "{@\\([^@]+\\)@}" (sanskrit--face-maker 'bold))
-  (sanskrit--replace-match
-   "€\\([^ ]+ \\)" (sanskrit--face-maker 'sanskrit-reference))
-  (sanskrit--replace-match
-   "^²\\([[:digit:]]+\\)" (sanskrit--face-maker 'sanskrit-numeral))
-  (sanskrit--replace-tag "ls" (sanskrit--face-maker 'sanskrit-reference))
-  (sanskrit--replace-tag "ab" (sanskrit--face-maker 'sanskrit-reference))
-  (sanskrit--replace-tag "ns" (sanskrit--face-maker 'sanskrit-reference))
-  (sanskrit--replace-tag "hom" (sanskrit--face-maker 'sanskrit-homonym))
-  (sanskrit--replace-tag "pcol" (sanskrit--face-maker 'italic))
-  (sanskrit--replace-tag "lex" (sanskrit--face-maker 'italic))
-  (sanskrit--replace-tag "bot" (sanskrit--face-maker 'italic))
-  (sanskrit--replace-tag "bio" (sanskrit--face-maker 'italic))
-  (sanskrit--replace-tag "etym" (sanskrit--face-maker 'italic))
-  (sanskrit--replace-tag "lang" (sanskrit--face-maker 'italic)))
-
-(defun sanskrit--ensure-dictionary-index ()
-  (unless (hash-table-p sanskrit--dictionary-index)
-    (setq sanskrit--dictionary-index (make-hash-table :test 'equal))
-    (dolist (file (mapcar #'car sanskrit-dictionary-files))
-      (sanskrit--dictionary-read-index file))))
+  (sanskrit--replace-match "{%\\([^%]+\\)%}" 'sanskrit-italic)
+  (sanskrit--replace-match "{@\\([^@]+\\)@}" 'sanskrit-bold)
+  (sanskrit--replace-match "€\\([^ ]+ \\)" 'sanskrit-reference)
+  (sanskrit--replace-match "^²\\([[:digit:]]+\\)" 'sanskrit-numeral)
+  (sanskrit--replace-tag "ls" 'sanskrit-reference)
+  (sanskrit--replace-tag "ab" 'sanskrit-reference))
 
 (defvar sanskrit-dictionary-history nil
   "History for input to ‘sanskrit-dictionary-lookup’")
@@ -344,22 +319,18 @@ TYPE must be either :AP or :MW"
     (erase-buffer)
     (current-buffer)))
 
-(defun sanskrit--insert-range (file beg end)
-  (let ((n (cadr (insert-file-contents file nil beg end))))
+(defun sanskrit--insert-range (beg end)
+  (let* ((file sanskrit-dictionary-file)
+	 (n (cadr (insert-file-contents file nil beg end))))
     (forward-char n)))
 
 (defun sanskrit--dictionary-show-entry (word)
-  (sanskrit--ensure-dictionary-index)
+  (sanskrit--dictionary-read-index)
   (if-let* ((entries (gethash word sanskrit--dictionary-index)))
       (with-current-buffer (sanskrit--dictionary-buffer)
-	(let ((i 0))
-	  (dolist (entry (reverse entries))
-	    (pcase-let ((`(,file ,beg ,end) entry))
-	      (pcase (sanskrit--dictionary-file-type file)
-		(:ap (sanskrit--insert-range file beg end)
-		     (insert ?\n))
-		(:mw (insert (format "²%d " (incf i)))
-		     (sanskrit--insert-range file beg end))))))
+	(dolist (entry (reverse entries))
+	  (pcase-let ((`(,beg ,end) entry))
+	    (sanskrit--insert-range beg end)))
 	(goto-char (point-min))
 	(sanskrit--dictionary-entry-header word)
 	(sanskrit--dictionary-process-entry)
@@ -370,8 +341,9 @@ TYPE must be either :AP or :MW"
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
+   ;; TODO: more intelligent conversion?
    (let ((init (sanskrit-iast-to-slp1 (or (current-word) ""))))
-     (sanskrit--ensure-dictionary-index)
+     (sanskrit--dictionary-read-index)
      (list (completing-read
 	    "Dictionary lookup (SLP1): "
 	    sanskrit--dictionary-index
