@@ -1,4 +1,4 @@
-# Sanskrit editing mode
+# Sanskrit editing mode for Emacs
 
 This repository provides tools for editing Sanskrit, including:
 - An input mode for entering IAST transliteration
