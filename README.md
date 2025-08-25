@@ -41,10 +41,10 @@ configuration.
 
 |   | Enter | Result |
 |---|---|---|
-| Long vowel | aa | ā |
-| Retroflex | d. | ḍ |
-| Long retroflex | rr. | ṝ |
-| Diacritic above | m'<br>s' | ṁ<br>ś |
-| Virgulilla | n~ | ñ |
-| Danda | \|<br>\|\| | ।<br>॥ |
+| Long vowel | `aa` | ā |
+| Retroflex | `d.` | ḍ |
+| Long retroflex | `rr.` | ṝ |
+| Diacritic above | `m'`<br>`s'` | ṁ<br>ś |
+| Virgulilla | `n~` | ñ |
+| Danda | `\|`<br>`\|\|` | ।<br>॥ |
 
