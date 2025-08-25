@@ -1,5 +1,7 @@
 # Sanskrit editing mode for Emacs
 
+<img width="772" height="744" alt="screenshot" src="https://github.com/user-attachments/assets/adc7b23f-d79e-451b-a8fc-759bba327965" />
+
 This repository provides tools for editing Sanskrit, including:
 - An input mode for entering IAST transliteration
 - Conversion utilities for IAST to SLP1 and vice-versa
