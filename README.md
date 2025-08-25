@@ -44,7 +44,7 @@ configuration.
 | Long vowel      | `aa`           | ā      |
 | Retroflex       | `d.`           | ḍ      |
 | Long retroflex  | `rr.`          | ṝ      |
-| Diacritic above | `m'`<br>`s'`   | ṁ<br>ś |
+| Diacritic above | `n'`<br>`s'`   | ṅ<br>ś |
 | Virgulilla      | `n~`           | ñ      |
 | Dandas          | `\|`<br>`\|\|` | ।<br>॥ |
 
