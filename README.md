@@ -38,26 +38,13 @@ configuration.
 ## Using the IAST postfix input method
 1. Enable the input method with `M-x sanskrit-toggle-input-method`
 2. To modify a letter, enter its modification character afterwards:
-- Long vowels with a macron are entered by repeating them:
-```
-aa  ⇒ ā
-rr. ⇒ ṝ
-```
-- Retroflex letters are entered using a period:
-```
-r. ⇒ ṛ
-l. ⇒ ḷ
-m. ⇒ ṃ
-s. ⇒ ṣ
-```
-- Letters with a diacritic above:
-```
-n' ⇒ ṅ
-s' ⇒ ś
-n~ ⇒ ñ
-```
-- Dandas are entered with the vertical bar:
-```
-|  ⇒ ।
-|| ⇒ ॥
-```
+
+|   | Enter | Result |
+|---|---|---|
+| Long vowel | aa | ā |
+| Retroflex | d. | ḍ |
+| Long retroflex | rr. | ṝ |
+| Diacritic above | m'<br>s' | ṁ<br>ś |
+| Virgulilla | n~ | ñ |
+| Danda | \|<br>\|\| | ।<br>॥ |
+
