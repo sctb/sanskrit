@@ -48,3 +48,4 @@ configuration.
 | Virgulilla      | `n~`           | ñ      |
 | Dandas          | `\|`<br>`\|\|` | ।<br>॥ |
 
+\* Input method was inspired by this [post](https://satish.com.in/20160319/) from Satish B. Setty
