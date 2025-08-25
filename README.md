@@ -31,8 +31,8 @@ configuration.
 ```
 
 ## Downloading and installing the dictionary
-1. Download the file `ap90txt.zip` from [Cologne University](https://www.sanskrit-lexicon.uni-koeln.de/scans/AP90Scan/2020/web/webtc/download.html)
-2. Extract its contents into this repository directory
+1. Download and unzip the file `ap90txt.zip` from [Cologne University](https://www.sanskrit-lexicon.uni-koeln.de/scans/AP90Scan/2020/web/webtc/download.html)
+2. Copy the dictionary file `txt/ap90.txt` into this repository
 3. Check that `M-: (sanskrit-dictionary-available-p)` is `t`
 
 ## Using the IAST postfix input method
