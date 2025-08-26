@@ -107,7 +107,7 @@
     ("e" . "े") ("ai" . "ै") ("o" . "ो") ("au" . "ौ")))
 
 (defvar sanskrit--signs
-  ;; anusvāra   visarga
+  ;; anusvāra               visarga
   '((?ṃ . "ं") (?ṁ . "ं") (?ḥ . "ः")))
 
 (defvar sanskrit--virama "्")
