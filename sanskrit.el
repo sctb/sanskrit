@@ -443,6 +443,7 @@
     (should (equal (sanskrit-render "agnimīḻe") "अग्निमीळे"))
     (should (equal (sanskrit-render "Śivo'ham") "शिवोऽहम्"))
     (should (equal (sanskrit-render "śivo’ham") "शिवोऽहम्"))
+    (should (equal (sanskrit-render "cetano’pi") "चेतनोऽपि"))
     (should (equal (sanskrit-render "viśvam-unmīlayati") "विश्वमुन्मीलयति")))
 
   (ert-deftest sanskrit-slp1-to-iast ()
