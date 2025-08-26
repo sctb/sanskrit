@@ -46,6 +46,7 @@ configuration.
 | Long retroflex  | `rr.`          | ṝ      |
 | Diacritic above | `n'`<br>`s'`   | ṅ<br>ś |
 | Virgulilla      | `n~`           | ñ      |
+| Approximant     | `l_`           | ḻ      |
 | Dandas          | `\|`<br>`\|\|` | ।<br>॥ |
 
 \* Input method was inspired by this [post](https://satish.com.in/20160319/) from Satish B. Setty
