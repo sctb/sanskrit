@@ -382,7 +382,7 @@
     ("t" . "t") ("th" . "T") ("d" . "d") ("dh" . "D") ("n" . "n")
     ("p" . "p") ("ph" . "P") ("b" . "b") ("bh" . "B") ("m" . "m")
     ("y" . "y") ("r" . "r")  ("l" . "l") ("v" . "v")
-    ("ś" . "S") ("ṣ" . "z")  ("s" . "s") ("h" . "h")))
+    ("ś" . "S") ("ṣ" . "z")  ("s" . "s") ("h" . "h") ("ḻ" . "L")))
 
 (defun sanskrit-iast-to-slp1 (string)
   "Convert ‘string’ in IAST transliteration format to SLP1"
@@ -454,7 +454,8 @@
     (should (equal (sanskrit-iast-to-slp1 "vimarśaḥ") "vimarSaH"))
     (should (equal (sanskrit-iast-to-slp1 "prakṛtiḥ") "prakftiH"))
     (should (equal (sanskrit-iast-to-slp1 "Ānanda-śakti") "Ananda-Sakti"))
-    (should (equal (sanskrit-iast-to-slp1 "ahaṃbhāva") "ahaMBAva")))
+    (should (equal (sanskrit-iast-to-slp1 "ahaṃbhāva") "ahaMBAva"))
+    (should (equal (sanskrit-iast-to-slp1 "agnimīḻe") "agnimILe")))
 
   (defun sanskrit-run-tests ()
     (interactive)
