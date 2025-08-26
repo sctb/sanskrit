@@ -93,8 +93,17 @@
     ("y" . "य") ("r" . "र") ("l" . "ल") ("v" . "व")	; semi-vowels
     ("ś" . "श") ("ṣ" . "ष") ("s" . "स") ("h" . "ह")))	; sibilants and h
 
+(defun sanskrit--string-set (list)
+  (let ((chars nil))
+    (dolist (string list)
+      (seq-do (lambda (c)
+		(unless (memq c chars)
+		  (push c chars)))
+	      string))
+    (concat chars)))
+
 (defvar sanskrit--consonant-chars
-  "kgṅcjñṭḍṇtdnpbmyrlvśṣsh")
+  (sanskrit--string-set (mapcar #'car sanskrit--consonants)))
 
 (defvar sanskrit--vowels
   '(("a" . "अ") ("ā" . "आ") ("i" . "इ") ("ī" . "ई") ("u" . "उ") ("ū" . "ऊ")
@@ -102,7 +111,7 @@
     ("e" . "ए") ("ai" . "ऐ") ("o" . "ओ") ("au" . "औ")))
 
 (defvar sanskrit--vowel-chars
-  "aāiīuūṛṝḷeo")
+  (sanskrit--string-set (mapcar #'car sanskrit--vowels)))
 
 (defvar sanskrit--signs
   ;; anusvāra   visarga
