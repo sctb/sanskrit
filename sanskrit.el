@@ -71,6 +71,8 @@
  ("m'" "ṁ") ("M'" "Ṁ")
  ("s'" "ś") ("S'" "Ś")
  ("n~" "ñ") ("N~" "Ñ")
+ ;; approximant
+ ("l_" "ḻ") ("L_" "Ḻ")
  ;; dandas
  ("|" "।") ("||" "॥"))
 
@@ -90,8 +92,9 @@
     ("ṭ" . "ट") ("ṭh" . "ठ") ("ḍ" . "ड") ("ḍh" . "ढ") ("ṇ" . "ण") ; retroflex
     ("t" . "त") ("th" . "थ") ("d" . "द") ("dh" . "ध") ("n" . "न") ; dental
     ("p" . "प") ("ph" . "फ") ("b" . "ब") ("bh" . "भ") ("m" . "म") ; labial
-    ("y" . "य") ("r" . "र") ("l" . "ल") ("v" . "व")	; semi-vowels
-    ("ś" . "श") ("ṣ" . "ष") ("s" . "स") ("h" . "ह")))	; sibilants and h
+    ("y" . "य") ("r" . "र") ("l" . "ल") ("v" . "व") ; semi-vowels
+    ("ś" . "श") ("ṣ" . "ष") ("s" . "स") ("h" . "ह") ; sibilants and h
+    ("ḻ" . "ळ"))) ; approximant
 
 (defvar sanskrit--vowels
   '(("a" . "अ") ("ā" . "आ") ("i" . "इ") ("ī" . "ई") ("u" . "उ") ("ū" . "ऊ")
@@ -431,7 +434,8 @@
     (should (equal (sanskrit-render "svabhittau") "स्वभित्तौ"))
     (should (equal (sanskrit-render "aṃga") "अंग"))
     (should (equal (sanskrit-render "aṁga") "अंग"))
-    (should (equal (sanskrit-render "aṅga") "अङ्ग")))
+    (should (equal (sanskrit-render "aṅga") "अङ्ग"))
+    (should (equal (sanskrit-render "agnimīḻe") "अग्निमीळे")))
 
   (ert-deftest sanskrit-slp1-to-iast ()
     (should (equal (sanskrit-slp1-to-iast "a") "a"))
