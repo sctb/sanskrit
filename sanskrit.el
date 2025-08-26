@@ -113,32 +113,35 @@
   '((?0 . "०") (?1 . "१") (?2 . "२") (?3 . "३") (?4 . "४")
     (?5 . "५") (?6 . "६") (?7 . "७") (?8 . "८") (?9 . "९")))
 
-(defun sanskrit--string-set (list)
+(defvar sanskrit--delimiters
+  '(?\s ?- ?। ?॥ ?\n))
+
+(defun sanskrit--char-set (list)
   (let ((chars nil))
     (dolist (string list)
-      (seq-do (lambda (c)
-		(unless (memq c chars)
-		  (push c chars)))
-	      string))
-    (concat chars)))
+      (dotimes (i (length string))
+	(let ((c (aref string i)))
+	  (unless (memq c chars)
+	    (push c chars)))))
+    chars))
 
 (defvar sanskrit--consonant-chars
-  (sanskrit--string-set (mapcar #'car sanskrit--consonants)))
+  (sanskrit--char-set (mapcar #'car sanskrit--consonants)))
 
 (defvar sanskrit--vowel-chars
-  (sanskrit--string-set (mapcar #'car sanskrit--vowels)))
+  (sanskrit--char-set (mapcar #'car sanskrit--vowels)))
 
 (defun sanskrit--consonant-p (char)
-  (seq-contains-p sanskrit--consonant-chars char))
+  (memq char sanskrit--consonant-chars))
 
 (defun sanskrit--vowel-p (char)
-  (seq-contains-p sanskrit--vowel-chars char))
+  (memq char sanskrit--vowel-chars))
 
 (defun sanskrit--sign-p (char)
   (assq char sanskrit--signs))
 
 (defun sanskrit--delimiter-p (char)
-  (memq char '(?\s ?- ?। ?॥ ?\n)))
+  (memq char sanskrit--delimiters))
 
 (defun sanskrit--span (string i matcher)
   (let ((j i)
