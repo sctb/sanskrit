@@ -118,7 +118,7 @@
     (?5 . "५") (?6 . "६") (?7 . "७") (?8 . "८") (?9 . "९")))
 
 (defvar sanskrit--delimiters
-  '(?\s ?- ?। ?॥ ?\n))
+  '(?\s ?। ?॥ ?\n))
 
 (defun sanskrit--char-set (list)
   (let ((chars nil))
@@ -185,13 +185,16 @@
     (or (assoc string alist)
         (error "Unrecognized vowel: %s" string))))
 
+(defun sanskrit--prepare-iast (string)
+  (downcase (string-replace "-" "" string)))
+
 (defun sanskrit-render (string)
   "Render ‘string’ in IAST format to Devanāgarī script"
-  (let ((string (downcase string))
-        (list nil)
-        (len (length string))
-        (i 0)
-        (consnt nil))
+  (let* ((string (sanskrit--prepare-iast string))
+         (len (length string))
+         (list nil)
+         (i 0)
+         (consnt nil))
     (while (< i len)
       (let* ((c (aref string i))
              (d (alist-get c sanskrit--digits))
@@ -439,7 +442,8 @@
     (should (equal (sanskrit-render "aṅga") "अङ्ग"))
     (should (equal (sanskrit-render "agnimīḻe") "अग्निमीळे"))
     (should (equal (sanskrit-render "Śivo'ham") "शिवोऽहम्"))
-    (should (equal (sanskrit-render "śivo’ham") "शिवोऽहम्")))
+    (should (equal (sanskrit-render "śivo’ham") "शिवोऽहम्"))
+    (should (equal (sanskrit-render "viśvam-unmīlayati") "विश्वमुन्मीलयति")))
 
   (ert-deftest sanskrit-slp1-to-iast ()
     (should (equal (sanskrit-slp1-to-iast "a") "a"))
