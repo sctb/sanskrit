@@ -93,6 +93,26 @@
     ("y" . "य") ("r" . "र") ("l" . "ल") ("v" . "व")	; semi-vowels
     ("ś" . "श") ("ṣ" . "ष") ("s" . "स") ("h" . "ह")))	; sibilants and h
 
+(defvar sanskrit--vowels
+  '(("a" . "अ") ("ā" . "आ") ("i" . "इ") ("ī" . "ई") ("u" . "उ") ("ū" . "ऊ")
+    ("ṛ" . "ऋ") ("ṝ" . "ॠ") ("ḷ" . "ऌ")
+    ("e" . "ए") ("ai" . "ऐ") ("o" . "ओ") ("au" . "औ")))
+
+(defvar sanskrit--vowel-signs
+  '(("a" . "") ("ā" . "ा") ("i" . "ि") ("ī" . "ी") ("u" . "ु") ("ū" . "ू")
+    ("ṛ" . "ृ") ("ṝ" . "ॄ") ("ḷ" . "ॢ")
+    ("e" . "े") ("ai" . "ै") ("o" . "ो") ("au" . "ौ")))
+
+(defvar sanskrit--signs
+  ;; anusvāra   visarga
+  '((?ṃ . "ं") (?ṁ . "ं") (?ḥ . "ः")))
+
+(defvar sanskrit--virama "्")
+
+(defvar sanskrit--digits
+  '((?0 . "०") (?1 . "१") (?2 . "२") (?3 . "३") (?4 . "४")
+    (?5 . "५") (?6 . "६") (?7 . "७") (?8 . "८") (?9 . "९")))
+
 (defun sanskrit--string-set (list)
   (let ((chars nil))
     (dolist (string list)
@@ -105,34 +125,14 @@
 (defvar sanskrit--consonant-chars
   (sanskrit--string-set (mapcar #'car sanskrit--consonants)))
 
-(defvar sanskrit--vowels
-  '(("a" . "अ") ("ā" . "आ") ("i" . "इ") ("ī" . "ई") ("u" . "उ") ("ū" . "ऊ")
-    ("ṛ" . "ऋ") ("ṝ" . "ॠ") ("ḷ" . "ऌ")
-    ("e" . "ए") ("ai" . "ऐ") ("o" . "ओ") ("au" . "औ")))
-
 (defvar sanskrit--vowel-chars
   (sanskrit--string-set (mapcar #'car sanskrit--vowels)))
 
-(defvar sanskrit--signs
-  ;; anusvāra   visarga
-  '((?ṃ . "ं") (?ṁ . "ं") (?ḥ . "ः")))
-
-(defvar sanskrit--vowel-signs
-  '(("a" . "") ("ā" . "ा") ("i" . "ि") ("ī" . "ी") ("u" . "ु") ("ū" . "ू")
-    ("ṛ" . "ृ") ("ṝ" . "ॄ") ("ḷ" . "ॢ")
-    ("e" . "े") ("ai" . "ै") ("o" . "ो") ("au" . "ौ")))
-
-(defvar sanskrit--virama "्")
-
-(defvar sanskrit--digits
-  '((?0 . "०") (?1 . "१") (?2 . "२") (?3 . "३") (?4 . "४")
-    (?5 . "५") (?6 . "६") (?7 . "७") (?8 . "८") (?9 . "९")))
+(defun sanskrit--consonant-p (char)
+  (seq-contains-p sanskrit--consonant-chars char))
 
 (defun sanskrit--vowel-p (char)
   (seq-contains-p sanskrit--vowel-chars char))
-
-(defun sanskrit--consonant-p (char)
-  (seq-contains-p sanskrit--consonant-chars char))
 
 (defun sanskrit--sign-p (char)
   (assq char sanskrit--signs))
