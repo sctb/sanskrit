@@ -107,8 +107,9 @@
     ("e" . "े") ("ai" . "ै") ("o" . "ो") ("au" . "ौ")))
 
 (defvar sanskrit--signs
-  ;; anusvāra               visarga
-  '((?ṃ . "ं") (?ṁ . "ं") (?ḥ . "ः")))
+  '((?ṃ . "ं") (?ṁ . "ं")	; anusvāra
+    (?ḥ . "ः")			; visarga
+    (?\' . "ऽ") (?’ . "ऽ")))	; avagraha
 
 (defvar sanskrit--virama "्")
 
@@ -382,7 +383,8 @@
     ("t" . "t") ("th" . "T") ("d" . "d") ("dh" . "D") ("n" . "n")
     ("p" . "p") ("ph" . "P") ("b" . "b") ("bh" . "B") ("m" . "m")
     ("y" . "y") ("r" . "r")  ("l" . "l") ("v" . "v")
-    ("ś" . "S") ("ṣ" . "z")  ("s" . "s") ("h" . "h") ("ḻ" . "L")))
+    ("ś" . "S") ("ṣ" . "z")  ("s" . "s") ("h" . "h") ("ḻ" . "L")
+    ("’" . "'")))
 
 (defun sanskrit-iast-to-slp1 (string)
   "Convert ‘string’ in IAST transliteration format to SLP1"
@@ -435,7 +437,9 @@
     (should (equal (sanskrit-render "aṃga") "अंग"))
     (should (equal (sanskrit-render "aṁga") "अंग"))
     (should (equal (sanskrit-render "aṅga") "अङ्ग"))
-    (should (equal (sanskrit-render "agnimīḻe") "अग्निमीळे")))
+    (should (equal (sanskrit-render "agnimīḻe") "अग्निमीळे"))
+    (should (equal (sanskrit-render "Śivo'ham") "शिवोऽहम्"))
+    (should (equal (sanskrit-render "śivo’ham") "शिवोऽहम्")))
 
   (ert-deftest sanskrit-slp1-to-iast ()
     (should (equal (sanskrit-slp1-to-iast "a") "a"))
@@ -443,7 +447,8 @@
     (should (equal (sanskrit-slp1-to-iast "q") "ḍ"))
     (should (equal (sanskrit-slp1-to-iast "aMhUraRa") "aṃhūraṇa"))
     (should (equal (sanskrit-slp1-to-iast "pramAtf") "pramātṛ"))
-    (should (equal (sanskrit-slp1-to-iast "mAyA-Sakti") "māyā-śakti")))
+    (should (equal (sanskrit-slp1-to-iast "mAyA-Sakti") "māyā-śakti"))
+    (should (equal (sanskrit-slp1-to-iast "Sivo'ham") "śivo’ham")))
 
   (ert-deftest sanskrit-iast-to-slp1 ()
     (should (equal (sanskrit-iast-to-slp1 "a") "a"))
@@ -455,7 +460,8 @@
     (should (equal (sanskrit-iast-to-slp1 "prakṛtiḥ") "prakftiH"))
     (should (equal (sanskrit-iast-to-slp1 "Ānanda-śakti") "Ananda-Sakti"))
     (should (equal (sanskrit-iast-to-slp1 "ahaṃbhāva") "ahaMBAva"))
-    (should (equal (sanskrit-iast-to-slp1 "agnimīḻe") "agnimILe")))
+    (should (equal (sanskrit-iast-to-slp1 "agnimīḻe") "agnimILe"))
+    (should (equal (sanskrit-iast-to-slp1 "Śivo’ham") "Sivo'ham")))
 
   (defun sanskrit-run-tests ()
     (interactive)
