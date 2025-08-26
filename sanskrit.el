@@ -203,8 +203,7 @@
               ((sanskrit--delimiter-p c)
                (when consnt
                  (push sanskrit--virama list))
-               (unless (eq c ?-)
-                 (push (string c) list)))
+               (push (string c) list))
               ((sanskrit--sign-p c)
                (push (alist-get c sanskrit--signs) list))
               ((sanskrit--vowel-p c)
