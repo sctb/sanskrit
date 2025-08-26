@@ -200,6 +200,7 @@
              (d (alist-get c sanskrit--digits))
              (n 1))
         (cond (d (push d list))
+	      ;; TODO: split input string elsewhere?
               ((sanskrit--delimiter-p c)
                (when consnt
                  (push sanskrit--virama list))
