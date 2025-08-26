@@ -68,6 +68,7 @@
  ("s." "ṣ") ("S." "Ṣ")
  ;; diacritic above
  ("n'" "ṅ") ("N'" "Ṅ")
+ ("m'" "ṁ") ("M'" "Ṁ")
  ("s'" "ś") ("S'" "Ś")
  ("n~" "ñ") ("N~" "Ñ")
  ;; dandas
@@ -105,7 +106,7 @@
 
 (defvar sanskrit--signs
   ;; anusvāra   visarga
-  '((?ṃ . "ं") (?ḥ . "ः")))
+  '((?ṃ . "ं") (?ṁ . "ं") (?ḥ . "ः")))
 
 (defvar sanskrit--vowel-signs
   '(("a" . "") ("ā" . "ा") ("i" . "ि") ("ī" . "ी") ("u" . "ु") ("ū" . "ू")
@@ -415,7 +416,10 @@
     (should (equal (sanskrit-render "citiḥ") "चितिः"))
     (should (equal (sanskrit-render "siddhi") "सिद्धि"))
     (should (equal (sanskrit-render "kḷp") "कॢप्"))
-    (should (equal (sanskrit-render "svabhittau") "स्वभित्तौ")))
+    (should (equal (sanskrit-render "svabhittau") "स्वभित्तौ"))
+    (should (equal (sanskrit-render "aṃga") "अंग"))
+    (should (equal (sanskrit-render "aṁga") "अंग"))
+    (should (equal (sanskrit-render "aṅga") "अङ्ग")))
 
   (ert-deftest sanskrit-slp1-to-iast ()
     (should (equal (sanskrit-slp1-to-iast "a") "a"))
