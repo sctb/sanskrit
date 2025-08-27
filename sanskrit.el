@@ -370,6 +370,7 @@
 	(t (message "No entry found for ‘%s’" word))))
 
 (defun sanskrit-dictionary-available-p ()
+  "Returns T if the dictionary is present and ready to use, NIL otherwise"
   (and (file-exists-p sanskrit-dictionary-file)
        (not (null (sanskrit--dictionary-read-index)))))
 
