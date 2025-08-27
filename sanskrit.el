@@ -200,7 +200,6 @@
              (d (alist-get c sanskrit--digits))
              (n 1))
         (cond (d (push d list))
-	      ;; TODO: split input string elsewhere?
               ((sanskrit--delimiter-p c)
                (when consnt
                  (push sanskrit--virama list))
@@ -345,35 +344,34 @@
     (forward-char n)))
 
 (defun sanskrit--dictionary-show-entry (word)
-  (sanskrit--dictionary-read-index)
-  (if-let* ((entries (gethash word sanskrit--dictionary-index)))
-      (with-current-buffer (sanskrit--dictionary-buffer)
-	(dolist (entry (reverse entries))
-	  (pcase-let ((`(,beg ,end) entry))
-	    (sanskrit--insert-range beg end)))
-	(goto-char (point-min))
-	(sanskrit--dictionary-entry-header word)
-	(sanskrit--dictionary-process-entry)
-	(sanskrit-dictionary-mode)
-	(pop-to-buffer (current-buffer)))
-    (message "No entry found for ‘%s’" word)))
+  (when-let* ((entries (gethash word sanskrit--dictionary-index)))
+    (with-current-buffer (sanskrit--dictionary-buffer)
+      (dolist (entry (reverse entries))
+	(pcase-let ((`(,beg ,end) entry))
+	  (sanskrit--insert-range beg end)))
+      (goto-char (point-min))
+      (sanskrit--dictionary-entry-header word)
+      (sanskrit--dictionary-process-entry)
+      (sanskrit-dictionary-mode)
+      (pop-to-buffer (current-buffer)))))
 
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
-   ;; TODO: more intelligent conversion?
    (let ((init (sanskrit-iast-to-slp1 (or (current-word) ""))))
-     (sanskrit--dictionary-read-index)
-     (list (completing-read
-	    "Dictionary lookup (SLP1): "
-	    sanskrit--dictionary-index
-	    nil t init 'sanskrit-dictionary-history))))
-  (sanskrit--dictionary-show-entry word))
+     (list (and (sanskrit-dictionary-available-p)
+		(completing-read
+		 "Dictionary lookup (SLP1): "
+		 sanskrit--dictionary-index
+		 nil t init 'sanskrit-dictionary-history)))))
+  (cond ((not (sanskrit-dictionary-available-p))
+	 (message "Missing dictionary file: %s" sanskrit-dictionary-file))
+	((sanskrit--dictionary-show-entry word))
+	(t (message "No entry found for ‘%s’" word))))
 
 (defun sanskrit-dictionary-available-p ()
-  (sanskrit--dictionary-read-index)
   (and (file-exists-p sanskrit-dictionary-file)
-       (hash-table-p sanskrit--dictionary-index)))
+       (not (null (sanskrit--dictionary-read-index)))))
 
 (defvar sanskrit--slp1
   '(("a" . "a") ("ā" . "A")  ("i" . "i") ("ī" . "I") ("u" . "u") ("ū" . "U")
