@@ -221,10 +221,13 @@
       (push sanskrit--virama list))
     (string-join (nreverse list))))
 
+(defun sanskrit--current-word ()
+  (or (current-word t t) ""))
+
 (defun sanskrit-render-current-word ()
   "Copy the current word in IAST format to the kill-ring as Devanāgarī"
   (interactive)
-  (let* ((word (current-word))
+  (let* ((word (sanskrit--current-word))
          (string (sanskrit-render word)))
     (kill-new string)
     (message "Copied: %s" string)))
@@ -358,7 +361,7 @@
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
-   (let ((init (sanskrit-iast-to-slp1 (or (current-word) ""))))
+   (let ((init (sanskrit-iast-to-slp1 (sanskrit--current-word))))
      (list (and (sanskrit-dictionary-available-p)
 		(completing-read
 		 "Dictionary lookup (SLP1): "
