@@ -6,12 +6,10 @@
   :prefix "sanskrit-"
   :group 'editing)
 
-(defvar sanskrit-mode-map (make-sparse-keymap)
-  "Keymap for the Sanskrit minor mode")
-
 (define-minor-mode sanskrit-mode
   "Toggle Sanskrit mode"
   :init-value nil
+  :keymap (make-sparse-keymap)
   :lighter " Sanskrit")
 
 (define-derived-mode sanskrit-dictionary-mode special-mode "Dictionary"
