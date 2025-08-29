@@ -46,7 +46,7 @@
 
 (quail-define-package
  sanskrit-input-method "UTF-8" "InR<" t
- "Input method for Sanskrit transliteration with postfix modifiers"
+ "Input method for Sanskrit IAST transliteration with postfix modifiers"
  nil t nil nil nil nil nil nil nil nil t)
 
 (quail-define-rules
