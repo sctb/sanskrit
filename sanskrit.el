@@ -116,7 +116,7 @@
     (?5 . "५") (?6 . "६") (?7 . "७") (?8 . "८") (?9 . "९")))
 
 (defvar sanskrit--delimiters
-  '(?\s ?। ?॥ ?\n))
+  '(?\s ?। ?॥ ?\n ?\t))
 
 (defun sanskrit--char-set (list)
   (let ((chars nil))
