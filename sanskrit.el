@@ -12,14 +12,21 @@
   :keymap (make-sparse-keymap)
   :lighter " Sanskrit")
 
+(define-derived-mode sanskrit-display-mode special-mode "Sanskrit"
+  "Major mode for displaying rendered Devanāgarī script")
+
 (define-derived-mode sanskrit-dictionary-mode special-mode "Dictionary"
   "Major mode for viewing Sanskrit dictionary entries"
   (sanskrit-mode +1)
   (visual-line-mode +1))
 
+(defface sanskrit-script
+  '((t :height 1.1))
+  "Face used for rendered Devanāgarī script")
+
 (defface sanskrit-headword
   '((t :height 1.1 :inherit font-lock-keyword-face))
-  "Face use for the headword in a dictionary entry")
+  "Face used for the headword in a dictionary entry")
 
 (defface sanskrit-italic
   '((t :inherit italic))
@@ -219,24 +226,35 @@
       (push sanskrit--virama list))
     (string-join (nreverse list))))
 
-(defun sanskrit--current-word ()
-  (or (current-word t t) ""))
+(defun sanskrit--display-script (string)
+  (with-current-buffer (get-buffer-create "*Sanskrit script*")
+    (sanskrit-display-mode)
+    (setq buffer-read-only nil)
+    (erase-buffer)
+    (insert (sanskrit--make-face string 'sanskrit-script))
+    (setq buffer-read-only t)
+    (pop-to-buffer
+     (current-buffer)
+     '(nil (window-height . fit-window-to-buffer)))))
+
+(defun sanskrit--current-word (&optional really-word)
+  (or (current-word t really-word) ""))
 
 (defun sanskrit-render-current-word ()
-  "Copy the current word in IAST format to the kill-ring as Devanāgarī"
+  "Display the current IAST word as Devanāgarī and copy to the kill-ring"
   (interactive)
   (let* ((word (sanskrit--current-word))
          (string (sanskrit-render word)))
     (kill-new string)
-    (message "Copied: %s" string)))
+    (sanskrit--display-script string)))
 
 (defun sanskrit-render-region (point mark)
-  "Copy the current region in IAST format to the kill-ring as Devanāgarī"
+  "Display the current IAST region as Devanāgarī and copy to the kill-ring"
   (interactive "r")
   (let* ((region (buffer-substring point mark))
          (string (sanskrit-render (string-trim region))))
     (kill-new string)
-    (message "Copied: %s" string)))
+    (sanskrit--display-script string)))
 
 (defun sanskrit--relative-file (path)
   (let ((file (or load-file-name (buffer-file-name))))
@@ -359,7 +377,7 @@
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
-   (let ((init (sanskrit-iast-to-slp1 (sanskrit--current-word))))
+   (let ((init (sanskrit-iast-to-slp1 (sanskrit--current-word t))))
      (list (and (sanskrit-dictionary-available-p)
 		(completing-read
 		 "Dictionary lookup (SLP1): "
@@ -425,6 +443,7 @@
     (should (equal (sanskrit-render "k") "क्"))
     (should (equal (sanskrit-render "ki") "कि"))
     (should (equal (sanskrit-render "14") "१४"))
+    (should (equal (sanskrit-render "ahaṃ") "अहं"))
     (should (equal (sanskrit-render "Śiva") "शिव"))
     (should (equal (sanskrit-render "Śaktī") "शक्ती"))
     (should (equal (sanskrit-render "icchā") "इच्छा"))
