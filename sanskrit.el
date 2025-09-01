@@ -9,11 +9,18 @@
 (defconst sanskrit-input-method "sanskrit-postfix"
   "Name of the QUAIL-based input method for writing IAST")
 
+(defvar-keymap sanskrit-mode-map
+  :doc "Keymap for the Sanskrit minor mode"
+  "C-c -" #'sanskrit-toggle-input-method
+  "C-c ." #'sanskrit-dictionary-lookup
+  "C-c '" #'sanskrit-render-current-word
+  "C-c \"" #'sanskrit-render-region)
+
 (define-minor-mode sanskrit-mode
   "Toggle Sanskrit mode"
   :init-value nil
-  :keymap (make-sparse-keymap)
   :lighter " Sanskrit"
+  :keymap sanskrit-mode-map
   (set-input-method (and sanskrit-mode sanskrit-input-method)))
 
 (define-derived-mode sanskrit-display-mode special-mode "Sanskrit"

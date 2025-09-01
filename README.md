@@ -4,13 +4,12 @@
 
 This repository provides tools for editing Sanskrit, including:
 - An input mode for entering IAST transliteration
+- A local Sanskrit-English dictionary
+- Rendering of transliteration to Devanāgarī script
 - Conversion utilities for IAST to SLP1 and vice-versa
-- A Sanskrit-English dictionary mode
-- Rendering of transliterations to Devanāgarī script
 
 As it is currently under early and active development, it has not yet
-been packaged for distribution and requires manual installation and
-configuration.
+been packaged for distribution and requires manual installation.
 
 ## Installation instructions
 
@@ -18,26 +17,16 @@ configuration.
 2. Add the repository to your `load-path` and `require` it:
 ```emacs-lisp
 (add-to-list 'load-path "~/path/to/sanskrit")
-(require 'ert) ;; for running tests (optional)
 (require 'sanskrit)
 ```
-3. Configure your desired keybindings:
-```emacs-lisp
-(let ((map sanskrit-mode-map))
-  (keymap-set map "C-c i" #'sanskrit-toggle-input-method)
-  (keymap-set map "C-c s" #'sanskrit-render-current-word)
-  (keymap-set map "C-c r" #'sanskrit-render-region)
-  (keymap-set map "C-c l" #'sanskrit-dictionary-lookup))
-```
+3. `M-x sanskrit-mode` to enable the minor mode
 
-## Downloading and installing the dictionary
+### Downloading and installing the dictionary
 1. Download and unzip the file `aptxt.zip` from [Cologne University](https://www.sanskrit-lexicon.uni-koeln.de/scans/APScan/2020/web/webtc/download.html)
 2. Copy the dictionary file `txt/ap.txt` into this repository
 3. Check that `M-: (sanskrit-dictionary-available-p)` is `t`
 
 ## Using the IAST postfix input method
-1. Enable the input method with `M-x sanskrit-toggle-input-method`
-2. Type accented characters according to the following rules:
 
 |                 | Enter          | Result |
 |-----------------|----------------|--------|
