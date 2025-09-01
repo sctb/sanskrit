@@ -1,8 +1,35 @@
-;; -*- lexical-binding: t -*-
+;; sanskrit.el --- Sanskrit editing for Emacs -*- lexical-binding: t -*-
+
+;; Copyright (c) 2025 Scott Bell
+
+;; Author: Scott Bell
+;; Maintainer: Scott Bell <sctb@me.com>
+;; Created: 2025
+;; License: GPL-3.0-or-later
+;; Version: 0
+;; Keywords: sanskrit devanagari dictionary
+;; URL: https://github.com/sctb/sanskrit
+
+;; This file is not part of GNU Emacs.
+
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Code:
 
 (defgroup sanskrit nil
   "Tools for editing Sanskrit"
-  :version "0.1"
+  :version "0"
   :prefix "sanskrit-"
   :group 'editing)
 
@@ -89,6 +116,7 @@
  ;; dandas
  ("|" "।") ("||" "॥"))
 
+;;;###autoload
 (defun sanskrit-toggle-input-method ()
   (interactive)
   (if (equal current-input-method sanskrit-input-method)
@@ -248,6 +276,7 @@
 (defun sanskrit--current-word (&optional really-word)
   (or (current-word t really-word) ""))
 
+;;;###autoload
 (defun sanskrit-render-current-word ()
   "Display the current IAST word as Devanāgarī and copy to the kill-ring"
   (interactive)
@@ -256,6 +285,7 @@
     (kill-new string)
     (sanskrit--display-script string)))
 
+;;;###autoload
 (defun sanskrit-render-region (point mark)
   "Display the current IAST region as Devanāgarī and copy to the kill-ring"
   (interactive "r")
@@ -382,6 +412,7 @@
       (sanskrit-dictionary-mode)
       (pop-to-buffer (current-buffer)))))
 
+;;;###autoload
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive

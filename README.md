@@ -1,4 +1,4 @@
-# Sanskrit editing mode for Emacs
+# Sanskrit editing for Emacs
 
 <img width="772" height="744" alt="screenshot" src="https://github.com/user-attachments/assets/adc7b23f-d79e-451b-a8fc-759bba327965" />
 
