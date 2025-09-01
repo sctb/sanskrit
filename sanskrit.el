@@ -6,7 +6,7 @@
   :prefix "sanskrit-"
   :group 'editing)
 
-(defvar sanskrit-input-method "sanskrit-postfix"
+(defconst sanskrit-input-method "sanskrit-postfix"
   "Name of the QUAIL-based input method for writing IAST")
 
 (define-minor-mode sanskrit-mode
