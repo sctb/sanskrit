@@ -6,11 +6,15 @@
   :prefix "sanskrit-"
   :group 'editing)
 
+(defvar sanskrit-input-method "sanskrit-postfix"
+  "Name of the QUAIL-based input method for writing IAST")
+
 (define-minor-mode sanskrit-mode
   "Toggle Sanskrit mode"
   :init-value nil
   :keymap (make-sparse-keymap)
-  :lighter " Sanskrit")
+  :lighter " Sanskrit"
+  (set-input-method (and sanskrit-mode sanskrit-input-method)))
 
 (define-derived-mode sanskrit-display-mode special-mode "Sanskrit"
   "Major mode for displaying rendered Devanāgarī script")
@@ -48,9 +52,6 @@
   '((t :inherit font-lock-type-face))
   "Face used for the item number in a dictionary entry")
 
-(defvar sanskrit-input-method "sanskrit-postfix"
-  "Name of the QUAIL-based input method for writing IAST")
-
 (quail-define-package
  sanskrit-input-method "UTF-8" "InR<" t
  "Input method for Sanskrit IAST transliteration with postfix modifiers"
@@ -279,7 +280,7 @@
         (insert-file-contents sanskrit-dictionary-file)
         (while (re-search-forward "<L>" nil t)
           (re-search-forward "<k1>\\(.*\\)<k2>")
-          (let ((word (match-string 1)))
+          (let ((word (sanskrit-slp1-to-iast (match-string 1))))
             (forward-line)
             (let ((beg (1- (position-bytes (point)))))
               (re-search-forward "<LEND>")
@@ -377,12 +378,12 @@
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
-   (let ((init (sanskrit-iast-to-slp1 (sanskrit--current-word t))))
+   (let ((word (sanskrit--current-word t)))
      (list (and (sanskrit-dictionary-available-p)
 		(completing-read
 		 "Dictionary lookup (SLP1): "
 		 sanskrit--dictionary-index
-		 nil t init 'sanskrit-dictionary-history)))))
+		 nil t word 'sanskrit-dictionary-history)))))
   (cond ((not (sanskrit-dictionary-available-p))
 	 (message "Missing dictionary file: %s" sanskrit-dictionary-file))
 	((sanskrit--dictionary-show-entry word))
