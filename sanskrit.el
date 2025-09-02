@@ -7,7 +7,7 @@
 ;; Created: 2025
 ;; License: GPL-3.0-or-later
 ;; Version: 0
-;; Keywords: sanskrit devanagari dictionary
+;; Keywords: sanskrit iast slp1 devanagari dictionary
 ;; URL: https://github.com/sctb/sanskrit
 
 ;; This file is not part of GNU Emacs.
