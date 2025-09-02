@@ -25,6 +25,14 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
+;; This package provides editing support for the International
+;; Alphabet of Sanskrit Transliteration (IAST). It also includes the
+;; ability to render transliteration into Devanagari script,
+;; conversion utilities between IAST and SLP1 formats, and local
+;; Sanskrit-English dictionary lookup.
+
 ;;; Code:
 
 (defgroup sanskrit nil
@@ -317,7 +325,7 @@
         (insert-file-contents sanskrit-dictionary-file)
         (while (re-search-forward "<L>" nil t)
           (re-search-forward "<k1>\\(.*\\)<k2>")
-          (let ((word (sanskrit-slp1-to-iast (match-string 1))))
+          (let ((word (match-string 1)))
             (forward-line)
             (let ((beg (1- (position-bytes (point)))))
               (re-search-forward "<LEND>")
@@ -416,7 +424,7 @@
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
-   (let ((word (sanskrit--current-word t)))
+   (let ((word (sanskrit-iast-to-slp1 (sanskrit--current-word t))))
      (list (and (sanskrit-dictionary-available-p)
 		(completing-read
 		 "Dictionary lookup (SLP1): "
