@@ -420,6 +420,11 @@
       (sanskrit-dictionary-mode)
       (pop-to-buffer (current-buffer)))))
 
+(defun sanskrit-dictionary-available-p ()
+  "Returns T if the dictionary is present and ready to use, NIL otherwise"
+  (and (file-exists-p sanskrit-dictionary-file)
+       (not (null (sanskrit--dictionary-read-index)))))
+
 ;;;###autoload
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
@@ -434,11 +439,6 @@
 	 (message "Missing dictionary file: %s" sanskrit-dictionary-file))
 	((sanskrit--dictionary-show-entry word))
 	(t (message "No entry found for ‘%s’" word))))
-
-(defun sanskrit-dictionary-available-p ()
-  "Returns T if the dictionary is present and ready to use, NIL otherwise"
-  (and (file-exists-p sanskrit-dictionary-file)
-       (not (null (sanskrit--dictionary-read-index)))))
 
 (defvar sanskrit--slp1
   '(("a" . "a") ("ā" . "A")  ("i" . "i") ("ī" . "I") ("u" . "u") ("ū" . "U")
