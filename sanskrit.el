@@ -436,9 +436,9 @@
                  sanskrit--dictionary-index
                  nil t init 'sanskrit-dictionary-history)))))
   (cond ((not (sanskrit-dictionary-available-p))
-	 (message "Missing dictionary file: %s" sanskrit-dictionary-file))
-	((sanskrit--dictionary-show-entry word))
-	(t (message "No entry found for ‘%s’" word))))
+         (message "Missing dictionary file: %s" sanskrit-dictionary-file))
+        ((sanskrit--dictionary-show-entry word))
+        (t (message "No entry found for ‘%s’" word))))
 
 (defvar sanskrit--slp1
   '(("a" . "a") ("ā" . "A")  ("i" . "i") ("ī" . "I") ("u" . "u") ("ū" . "U")
@@ -457,19 +457,19 @@
 (defun sanskrit-iast-to-slp1 (string)
   "Convert ‘string’ in IAST transliteration format to SLP1"
   (let ((list nil)
-	(string (downcase string))
-	(i 0)
-	(len (length string)))
+        (string (downcase string))
+        (i 0)
+        (len (length string)))
     (while (< i len)
       (let* ((k2 (sanskrit--take-2 string i))
-	     (k1 (sanskrit--take-1 string i))
-	     (pair (or (assoc k2 sanskrit--slp1)
-		       (assoc k1 sanskrit--slp1))))
-	(cond ((null pair)
-	       (push k1 list)
-	       (incf i))
-	      (t (push (cdr pair) list)
-		 (incf i (length (car pair)))))))
+             (k1 (sanskrit--take-1 string i))
+             (pair (or (assoc k2 sanskrit--slp1)
+                       (assoc k1 sanskrit--slp1))))
+        (cond ((null pair)
+               (push k1 list)
+               (incf i))
+              (t (push (cdr pair) list)
+                 (incf i (length (car pair)))))))
     (string-join (nreverse list))))
 
 (defun sanskrit-slp1-to-iast (string)
@@ -477,7 +477,7 @@
   (let ((list nil))
     (dotimes (i (length string))
       (let* ((key (sanskrit--take-1 string i))
-	     (pair (rassoc key sanskrit--slp1)))
+             (pair (rassoc key sanskrit--slp1)))
         (push (or (car pair) key) list)))
     (string-join (nreverse list))))
 
