@@ -456,10 +456,10 @@
 
 (defun sanskrit-iast-to-slp1 (string)
   "Convert ‘string’ in IAST transliteration format to SLP1"
-  (let ((list nil)
-        (string (downcase string))
-        (i 0)
-        (len (length string)))
+  (let* ((string (downcase string))
+         (len (length string))
+	 (list nil)
+         (i 0))
     (while (< i len)
       (let* ((k2 (sanskrit--take-2 string i))
              (k1 (sanskrit--take-1 string i))
