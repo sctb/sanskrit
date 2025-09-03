@@ -430,11 +430,11 @@
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
    (let ((init (sanskrit-iast-to-slp1 (sanskrit--current-word t))))
-     (list (and (sanskrit-dictionary-available-p)
-                (completing-read
-                 "Dictionary lookup (SLP1): "
-                 sanskrit--dictionary-index
-                 nil t init 'sanskrit-dictionary-history)))))
+     (list (when (sanskrit-dictionary-available-p)
+             (completing-read
+              "Dictionary lookup (SLP1): "
+              sanskrit--dictionary-index
+              nil t init 'sanskrit-dictionary-history)))))
   (cond ((not (sanskrit-dictionary-available-p))
          (message "Missing dictionary file: %s" sanskrit-dictionary-file))
         ((sanskrit--dictionary-show-entry word))
