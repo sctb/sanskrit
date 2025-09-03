@@ -156,9 +156,9 @@
     ("e" . "े") ("ai" . "ै") ("o" . "ो") ("au" . "ौ")))
 
 (defvar sanskrit--signs
-  '((?ṃ . "ं") (?ṁ . "ं") ; anusvāra
-    (?ḥ . "ः")                  ; visarga
-    (?\' . "ऽ") (?’ . "ऽ")))    ; avagraha
+  '((?ṃ . "ं") (?ṁ . "ं")   ; anusvāra
+    (?ḥ . "ः")              ; visarga
+    (?\' . "ऽ") (?’ . "ऽ"))) ; avagraha
 
 (defvar sanskrit--virama "्")
 
@@ -458,7 +458,7 @@
   "Convert ‘string’ in IAST transliteration format to SLP1"
   (let* ((string (downcase string))
          (len (length string))
-	 (list nil)
+         (list nil)
          (i 0))
     (while (< i len)
       (let* ((k2 (sanskrit--take-2 string i))
