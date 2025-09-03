@@ -156,9 +156,9 @@
     ("e" . "े") ("ai" . "ै") ("o" . "ो") ("au" . "ौ")))
 
 (defvar sanskrit--signs
-  '((?ṃ . "ं") (?ṁ . "ं")	; anusvāra
-    (?ḥ . "ः")			; visarga
-    (?\' . "ऽ") (?’ . "ऽ")))	; avagraha
+  '((?ṃ . "ं") (?ṁ . "ं") ; anusvāra
+    (?ḥ . "ः")                  ; visarga
+    (?\' . "ऽ") (?’ . "ऽ")))    ; avagraha
 
 (defvar sanskrit--virama "्")
 
@@ -173,9 +173,9 @@
   (let ((chars nil))
     (dolist (string list)
       (dotimes (i (length string))
-	(let ((c (aref string i)))
-	  (unless (memq c chars)
-	    (push c chars)))))
+        (let ((c (aref string i)))
+          (unless (memq c chars)
+            (push c chars)))))
     chars))
 
 (defvar sanskrit--consonant-chars
@@ -198,7 +198,7 @@
 
 (defun sanskrit--span (string i matcher)
   (let ((j i)
-	(len (length string)))
+        (len (length string)))
     (while (and (< j len) (funcall matcher (aref string j)))
       (incf j))
     (substring string i j)))
@@ -343,20 +343,20 @@
 (defun sanskrit--dictionary-read-index ()
   (or (hash-table-p sanskrit--dictionary-index)
       (let ((file (sanskrit--dictionary-index-file))
-	    (index (make-hash-table :test 'equal)))
-	(unless (file-exists-p file)
-	  (sanskrit--index-dictionary))
-	(with-temp-buffer
-	  (insert-file-contents file)
-	  (while-let ((form (sanskrit--dictionary-index-read-form)))
-	    (pcase-let ((`(,word . ,location) form))
-	      (push location (gethash word index))))
-	  (setq sanskrit--dictionary-index index)))))
+            (index (make-hash-table :test 'equal)))
+        (unless (file-exists-p file)
+          (sanskrit--index-dictionary))
+        (with-temp-buffer
+          (insert-file-contents file)
+          (while-let ((form (sanskrit--dictionary-index-read-form)))
+            (pcase-let ((`(,word . ,location) form))
+              (push location (gethash word index))))
+          (setq sanskrit--dictionary-index index)))))
 
 (defun sanskrit--dictionary-entry-header (word)
   (let* ((word (sanskrit-slp1-to-iast word))
-	 (deva (sanskrit-render word))
-	 (string (concat word " " deva)))
+         (deva (sanskrit-render word))
+         (string (concat word " " deva)))
     (save-excursion
       (sanskrit--make-face string 'sanskrit-headword)
       (insert string)
@@ -370,11 +370,11 @@
   (save-excursion
     (while (re-search-forward regex nil t)
       (let ((match (match-string 1)))
-	(cond ((null new) (replace-match ""))
-	      ((stringp new) (replace-match new))
-	      ((functionp new) (replace-match (funcall new match)))
-	      ((symbolp new) (replace-match (sanskrit--make-face match new)))
-	      (t (error "Unrecognized replacement: %s" new)))))))
+        (cond ((null new) (replace-match ""))
+              ((stringp new) (replace-match new))
+              ((functionp new) (replace-match (funcall new match)))
+              ((symbolp new) (replace-match (sanskrit--make-face match new)))
+              (t (error "Unrecognized replacement: %s" new)))))))
 
 (defun sanskrit--replace-tag (tag &optional new)
   (let ((regex (format "<%s[^>]*>\\([^<]*\\)</%1$s>" tag)))
@@ -405,15 +405,15 @@
 
 (defun sanskrit--insert-range (beg end)
   (let* ((file sanskrit-dictionary-file)
-	 (n (cadr (insert-file-contents file nil beg end))))
+         (n (cadr (insert-file-contents file nil beg end))))
     (forward-char n)))
 
 (defun sanskrit--dictionary-show-entry (word)
   (when-let* ((entries (gethash word sanskrit--dictionary-index)))
     (with-current-buffer (sanskrit--dictionary-buffer)
       (dolist (entry (reverse entries))
-	(pcase-let ((`(,beg ,end) entry))
-	  (sanskrit--insert-range beg end)))
+        (pcase-let ((`(,beg ,end) entry))
+          (sanskrit--insert-range beg end)))
       (goto-char (point-min))
       (sanskrit--dictionary-entry-header word)
       (sanskrit--dictionary-process-entry)
@@ -431,10 +431,10 @@
   (interactive
    (let ((init (sanskrit-iast-to-slp1 (sanskrit--current-word t))))
      (list (and (sanskrit-dictionary-available-p)
-		(completing-read
-		 "Dictionary lookup (SLP1): "
-		 sanskrit--dictionary-index
-		 nil t init 'sanskrit-dictionary-history)))))
+                (completing-read
+                 "Dictionary lookup (SLP1): "
+                 sanskrit--dictionary-index
+                 nil t init 'sanskrit-dictionary-history)))))
   (cond ((not (sanskrit-dictionary-available-p))
 	 (message "Missing dictionary file: %s" sanskrit-dictionary-file))
 	((sanskrit--dictionary-show-entry word))
