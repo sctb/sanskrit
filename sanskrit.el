@@ -48,15 +48,18 @@
   :doc "Keymap for the Sanskrit minor mode"
   "C-c -" #'sanskrit-toggle-input-method
   "C-c ." #'sanskrit-dictionary-lookup
-  "C-c '" #'sanskrit-render-current-word
-  "C-c \"" #'sanskrit-render-region)
+  "C-c '" #'sanskrit-render-region)
 
 (define-minor-mode sanskrit-mode
   "Toggle Sanskrit mode"
   :init-value nil
   :lighter " Sanskrit"
   :keymap sanskrit-mode-map
-  (set-input-method (and sanskrit-mode sanskrit-input-method)))
+  (cond (sanskrit-mode
+         (sanskrit--start-timer)
+         (set-input-method sanskrit-input-method))
+        (t (sanskrit--stop-timer)
+           (set-input-method nil))))
 
 (define-derived-mode sanskrit-display-mode special-mode "Sanskrit"
   "Major mode for displaying rendered Devanāgarī script")
@@ -65,6 +68,10 @@
   "Major mode for viewing Sanskrit dictionary entries"
   (sanskrit-mode +1)
   (visual-line-mode +1))
+
+(defcustom sanskrit-idle-delay 0.50
+  "Number of seconds of idle time before rendering the current word"
+  :type 'number)
 
 (defface sanskrit-script
   '((t :height 1.1))
@@ -196,6 +203,11 @@
 (defun sanskrit--delimiter-p (char)
   (memq char sanskrit--delimiters))
 
+(defun sanskrit--word-char-p (char)
+  (or (sanskrit--consonant-p char)
+      (sanskrit--vowel-p char)
+      (sanskrit--sign-p char)))
+
 (defun sanskrit--span (string i matcher)
   (let ((j i)
         (len (length string)))
@@ -285,15 +297,6 @@
   (or (current-word t really-word) ""))
 
 ;;;###autoload
-(defun sanskrit-render-current-word ()
-  "Display the current IAST word as Devanāgarī and copy to the kill-ring"
-  (interactive)
-  (let* ((word (sanskrit--current-word))
-         (string (sanskrit-render word)))
-    (kill-new string)
-    (sanskrit--display-script string)))
-
-;;;###autoload
 (defun sanskrit-render-region (point mark)
   "Display the current IAST region as Devanāgarī and copy to the kill-ring"
   (interactive "r")
@@ -301,6 +304,35 @@
          (string (sanskrit-render (string-trim region))))
     (kill-new string)
     (sanskrit--display-script string)))
+
+(defun sanskrit--word-p (string)
+  (when (> (length string) 0)
+    (let ((word (sanskrit--prepare-iast string)))
+      (seq-every-p #'sanskrit--word-char-p word))))
+
+(defun sanskrit--render-word ()
+  (let ((word (sanskrit--current-word t)))
+    (when (sanskrit--word-p word)
+      (condition-case nil
+          (let ((string (sanskrit-render word)))
+            (let (message-log-max) (message "%s" string)))
+        (error nil)))))
+
+(defvar sanskrit--timer nil)
+
+(defun sanskrit--ensure-timer ()
+  (when sanskrit--timer
+    (cancel-timer sanskrit--timer))
+  (let* ((secs sanskrit-idle-delay)
+         (timer (run-with-idle-timer secs nil #'sanskrit--render-word)))
+    (setq sanskrit--timer timer)))
+
+(defun sanskrit--start-timer ()
+  (add-hook 'post-command-hook 'sanskrit--ensure-timer nil t))
+
+(defun sanskrit--stop-timer ()
+  (remove-hook 'post-command-hook 'sanskrit--ensure-timer t)
+  (cancel-timer sanskrit--timer))
 
 (defun sanskrit--relative-file (path)
   (let ((file (or load-file-name (buffer-file-name))))
