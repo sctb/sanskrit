@@ -415,16 +415,32 @@
 (defun sanskrit--current-word ()
   (or (current-word t t) ""))
 
+(defun sanskrit--dictionary-exact-match (word)
+  (and (gethash word sanskrit--dictionary-index) word))
+
+(defun sanskrit--with-visarga (word)
+  (concat word "ḥ"))
+
+(defun sanskrit--without-visarga (word)
+  (when (equal (substring word -1) "ḥ")
+    (substring word 0 (1- (length word)))))
+
+(defun sanskrit--dictionary-match (word)
+  (or (sanskrit--dictionary-exact-match word)
+      (sanskrit--dictionary-exact-match (sanskrit--with-visarga word))
+      (sanskrit--dictionary-exact-match (sanskrit--without-visarga word))))
+
 ;;;###autoload
 (defun sanskrit-dictionary-lookup (word)
   "Look up ‘word’ in SLP1 format in the dictionary"
   (interactive
    (let ((init (sanskrit--current-word)))
      (list (when (sanskrit-dictionary-available-p)
-             (completing-read
-              "Dictionary lookup: "
-              sanskrit--dictionary-index
-              nil t init 'sanskrit-dictionary-history nil t)))))
+             (or (sanskrit--dictionary-match init)
+                 (completing-read
+                  "Dictionary lookup: "
+                  sanskrit--dictionary-index
+                  nil t init 'sanskrit-dictionary-history nil t))))))
   (cond ((not (sanskrit-dictionary-available-p))
          (message "Missing dictionary file: %s" sanskrit-dictionary-file))
         ((sanskrit--dictionary-show-entry word))
