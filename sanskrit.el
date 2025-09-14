@@ -419,10 +419,12 @@
   (and (gethash word sanskrit--dictionary-index) word))
 
 (defun sanskrit--with-visarga (word)
-  (concat word "ḥ"))
+  (when (> (length word) 0)
+    (concat word "ḥ")))
 
 (defun sanskrit--without-visarga (word)
-  (when (equal (substring word -1) "ḥ")
+  (when (and (> (length word) 0)
+             (equal (substring word -1) "ḥ"))
     (substring word 0 (1- (length word)))))
 
 (defun sanskrit--dictionary-match (word)
