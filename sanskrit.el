@@ -413,24 +413,21 @@
        (not (null (sanskrit--dictionary-read-index)))))
 
 (defun sanskrit--current-word ()
-  (or (current-word t t) ""))
+  (downcase (or (current-word t t) "")))
 
 (defun sanskrit--dictionary-exact-match (word)
   (and (gethash word sanskrit--dictionary-index) word))
 
-(defun sanskrit--with-visarga (word)
+(defun sanskrit--toggle-visarga (word)
   (when (> (length word) 0)
-    (concat word "ḥ")))
-
-(defun sanskrit--without-visarga (word)
-  (when (and (> (length word) 0)
-             (equal (substring word -1) "ḥ"))
-    (substring word 0 (1- (length word)))))
+    (if (equal (substring word -1) "ḥ")
+        (substring word 0 (1- (length word)))
+      (concat word "ḥ"))))
 
 (defun sanskrit--dictionary-match (word)
   (or (sanskrit--dictionary-exact-match word)
-      (sanskrit--dictionary-exact-match (sanskrit--with-visarga word))
-      (sanskrit--dictionary-exact-match (sanskrit--without-visarga word))))
+      (sanskrit--dictionary-exact-match
+       (sanskrit--toggle-visarga word))))
 
 ;;;###autoload
 (defun sanskrit-dictionary-lookup (word)
