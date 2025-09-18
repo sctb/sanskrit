@@ -29,10 +29,12 @@ been packaged for distribution and requires manual installation.
 ## Usage
 
 ### Default keybindings
-|-------|------------------------------|
-| C-c . | sanskrit-dictionary-lookup   |
-| C-c ' | sanskrit-render-region       |
-| C-c - | sanskrit-toggle-input-method |
+
+| Key     | Function                       |
+|---------|--------------------------------|
+| `C-c .` | `sanskrit-dictionary-lookup`   |
+| `C-c '` | `sanskrit-render-region`       |
+| `C-c -` | `sanskrit-toggle-input-method` |
 
 ### Using the IAST postfix input method
 
