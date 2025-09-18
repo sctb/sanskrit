@@ -46,9 +46,9 @@
 
 (defvar-keymap sanskrit-mode-map
   :doc "Keymap for the Sanskrit minor mode"
-  "C-c -" #'sanskrit-toggle-input-method
   "C-c ." #'sanskrit-dictionary-lookup
-  "C-c '" #'sanskrit-render-region)
+  "C-c '" #'sanskrit-render-region
+  "C-c -" #'sanskrit-toggle-input-method)
 
 (define-minor-mode sanskrit-mode
   "Toggle Sanskrit mode"

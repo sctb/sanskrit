@@ -26,6 +26,14 @@ been packaged for distribution and requires manual installation.
 2. Copy the dictionary file `txt/ap.txt` into this repository
 3. Check that `M-: (sanskrit-dictionary-available-p)` is `t`
 
+### Usage
+
+## Default keybindings
+|-------|------------------------------|
+| C-c . | sanskrit-dictionary-lookup   |
+| C-c ' | sanskrit-render-region       |
+| C-c - | sanskrit-toggle-input-method |
+
 ## Using the IAST postfix input method
 
 |                 | Enter          | Result |
